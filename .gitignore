@@ -1,0 +1,17 @@
+node_modules
+*.env
+*.env.local
+*.env.production
+.DS_Store
+/build
+/public/build
+.cache
+
+# Google Analytics credentials
+credentials/
+*.json
+raiseup-analytics-key.json*
+
+# Logs
+*.log
+server.log
