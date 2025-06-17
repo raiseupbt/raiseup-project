@@ -1,5 +1,8 @@
 import { vitePlugin as remix } from "@remix-run/dev";
+import { installGlobals } from "@remix-run/node";
 import { defineConfig, loadEnv } from "vite";
+
+installGlobals();
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
