@@ -5,7 +5,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import type { LinksFunction, HeadersFunction } from "@remix-run/node";
+import type { LinksFunction, HeadersFunction, MetaFunction } from "@remix-run/node";
 
 export const headers: HeadersFunction = () => {
   return {
