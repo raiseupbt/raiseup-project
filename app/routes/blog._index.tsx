@@ -18,6 +18,7 @@ export const loader = async () => {
     });
   } catch (error) {
     console.error('Erro ao carregar artigos:', error);
+    // Retorna dados vazios em caso de erro
     return json({
       artigosDestaque: [],
       artigosRegulares: []

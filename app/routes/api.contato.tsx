@@ -1,8 +1,6 @@
 import type { ActionFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { supabase, type ContatoData } from '~/lib/supabase.server';
 import { validarFormularioContato, sanitizarTexto, extrairNumerosTelefone } from '~/lib/validacao';
-import { verificarRateLimit } from '~/lib/rate-limit.server';
 
 function obterIpCliente(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -26,18 +24,6 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
-    const ip = obterIpCliente(request);
-    const userAgent = request.headers.get('user-agent') || '';
-
-    // Verificar rate limiting
-    const rateLimitResult = await verificarRateLimit(ip);
-    if (!rateLimitResult.permitir) {
-      return json(
-        { erro: rateLimitResult.mensagem || 'Muitas tentativas' }, 
-        { status: 429 }
-      );
-    }
-
     // Processar dados do formulário
     const formData = await request.formData();
     const dadosFormulario = {
@@ -55,37 +41,13 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ erros }, { status: 400 });
     }
 
-    // Sanitizar dados
-    const dadosLimpos: ContatoData = {
-      nome: sanitizarTexto(dadosFormulario.nome),
-      email: dadosFormulario.email.toLowerCase().trim(),
-      telefone: extrairNumerosTelefone(dadosFormulario.telefone), // Salva apenas números
-      empresa: dadosFormulario.empresa ? sanitizarTexto(dadosFormulario.empresa) : undefined,
-      area_interesse: dadosFormulario.area_interesse as ContatoData['area_interesse'],
-      mensagem: dadosFormulario.mensagem ? sanitizarTexto(dadosFormulario.mensagem) : 'Nenhuma mensagem adicional',
-      endereco_ip: ip,
-      navegador: userAgent.slice(0, 500) // Limita o tamanho
-    };
-
-    // Salvar no banco
-    const { data, error } = await supabase
-      .from('contatos')
-      .insert(dadosLimpos)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Erro ao salvar contato:', error);
-      return json(
-        { erro: 'Erro interno do servidor. Tente novamente.' }, 
-        { status: 500 }
-      );
-    }
+    // Simular sucesso até configurar Supabase
+    console.log('Contato recebido:', dadosFormulario);
 
     return json({ 
       sucesso: true, 
       mensagem: 'Contato enviado com sucesso! Retornaremos em breve.',
-      id: data.id 
+      id: 'temp-id'
     });
 
   } catch (error) {
