@@ -1,12 +1,8 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
-import { requireUser } from "~/lib/auth.server";
-import { supabase } from "~/lib/supabase.server";
-import AdminLayout from "~/components/AdminLayout";
 
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async () => {
   // Temporariamente desabilitado até configurar autenticação
   // const user = await requireUser(request);
 
@@ -116,11 +112,86 @@ export default function AdminDashboard() {
         `
       }} />
       
-      <AdminLayout 
-        user={{id: '1', nome: 'Admin', email: 'admin@raiseup.com.br'}} 
-        currentPage="dashboard"
-        pageTitle="Dashboard"
-      >
+      <div style={{
+        minHeight: '100vh',
+        background: '#0a0f1c',
+        color: '#e2e8f0',
+        fontFamily: 'Inter, sans-serif'
+      }}>
+        {/* Admin Header */}
+        <header style={{
+          background: 'rgba(26, 32, 44, 0.95)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid #334155',
+          padding: '1rem 0'
+        }}>
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 2rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <Link to="/" style={{
+                color: '#0ea5e9',
+                textDecoration: 'none',
+                fontSize: '1.5rem',
+                fontWeight: '700'
+              }}>
+                RaiseUp Admin
+              </Link>
+              <nav style={{ display: 'flex', gap: '1rem' }}>
+                <span style={{
+                  color: '#0ea5e9',
+                  padding: '0.5rem 1rem',
+                  background: 'rgba(14, 165, 233, 0.1)',
+                  borderRadius: '8px'
+                }}>
+                  Dashboard
+                </span>
+                <Link to="/admin/contatos" style={{
+                  color: '#94a3b8',
+                  textDecoration: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px'
+                }}>
+                  Contatos
+                </Link>
+                <Link to="/admin/artigos" style={{
+                  color: '#94a3b8',
+                  textDecoration: 'none',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px'
+                }}>
+                  Artigos
+                </Link>
+              </nav>
+            </div>
+            <Link to="/" style={{
+              color: '#94a3b8',
+              textDecoration: 'none',
+              fontSize: '0.9rem'
+            }}>
+              ← Voltar ao Site
+            </Link>
+          </div>
+        </header>
+
+        <main style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '2rem'
+        }}>
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: '600',
+            marginBottom: '2rem',
+            color: '#f8fafc'
+          }}>
+            Dashboard Administrativo
+          </h1>
 
       {/* Cards de Estatísticas */}
       <div className="dashboard-stats-grid" style={{
@@ -452,8 +523,9 @@ export default function AdminDashboard() {
               )}
             </div>
           </div>
+        </div>
+        </main>
       </div>
-    </AdminLayout>
     </>
   );
 }
