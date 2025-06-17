@@ -2,7 +2,7 @@ import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
 export const loader = async () => {
-  // Dados mockados para demonstração
+  // Dados mockados para demonstração - Dashboard completo
   return json({
     estatisticas: {
       totalContatos: 42,
@@ -10,295 +10,692 @@ export const loader = async () => {
       contatosHoje: 3,
       contatosOntem: 5,
       acessos30Dias: 12500,
-      crescimentoAcessos: 18
+      crescimentoAcessos: 18,
+      crescimentoContatos: 25,
+      crescimentoArtigos: 12,
+      tempoMedioSessao: '2m 45s',
+      taxaConversao: 3.2,
+      usuariosAtivos: 89,
+      paginasPopulares: 324
     },
     contatosRecentes: [
-      { id: '1', nome: 'João Silva', email: 'joao@email.com', criado_em: new Date().toISOString(), status: 'novo' },
-      { id: '2', nome: 'Maria Santos', email: 'maria@email.com', criado_em: new Date().toISOString(), status: 'respondido' },
-      { id: '3', nome: 'Pedro Costa', email: 'pedro@email.com', criado_em: new Date().toISOString(), status: 'novo' }
+      { id: '1', nome: 'João Silva', email: 'joao@empresa.com', empresa: 'Tech Solutions', area_interesse: 'Agentes Conversacionais', criado_em: new Date().toISOString(), status: 'novo' },
+      { id: '2', nome: 'Maria Santos', email: 'maria@startup.com', empresa: 'StartupX', area_interesse: 'Agentes de Mídias Sociais', criado_em: new Date(Date.now() - 3600000).toISOString(), status: 'respondido' },
+      { id: '3', nome: 'Pedro Costa', email: 'pedro@consulting.com', empresa: 'Consulting Pro', area_interesse: 'Agentes de Produtividade', criado_em: new Date(Date.now() - 7200000).toISOString(), status: 'novo' },
+      { id: '4', nome: 'Ana Rodriguez', email: 'ana@digital.com', empresa: 'Digital Agency', area_interesse: 'Consultoria em IA', criado_em: new Date(Date.now() - 10800000).toISOString(), status: 'em_andamento' }
     ],
     artigosPopulares: [
-      { id: '1', titulo: 'Como a IA está transformando negócios', visualizacoes: 150, ativo: true },
-      { id: '2', titulo: 'Automação humanizada: o futuro do atendimento', visualizacoes: 98, ativo: true },
-      { id: '3', titulo: 'Agentes de produtividade na prática', visualizacoes: 76, ativo: true }
-    ]
+      { id: '1', titulo: 'Como a IA está transformando negócios', slug: 'ia-transformando-negocios', visualizacoes: 1250, crescimento: 23, ativo: true, autor: 'RaiseUp Team' },
+      { id: '2', titulo: 'Automação humanizada: o futuro do atendimento', slug: 'automacao-humanizada', visualizacoes: 890, crescimento: 15, ativo: true, autor: 'RaiseUp Team' },
+      { id: '3', titulo: 'Agentes de produtividade na prática', slug: 'agentes-produtividade', visualizacoes: 760, crescimento: 8, ativo: true, autor: 'RaiseUp Team' },
+      { id: '4', titulo: 'WhatsApp Business com IA: Guia completo', slug: 'whatsapp-business-ia', visualizacoes: 650, crescimento: 31, ativo: true, autor: 'RaiseUp Team' }
+    ],
+    metricas: {
+      vendasMes: 15,
+      metaVendas: 20,
+      leadsMes: 78,
+      metaLeads: 100,
+      satisfacaoCliente: 4.8,
+      ticketMedio: 2500
+    }
   });
 };
 
 export default function Admin() {
-  const { estatisticas, contatosRecentes, artigosPopulares } = useLoaderData<typeof loader>();
+  const { estatisticas, contatosRecentes, artigosPopulares, metricas } = useLoaderData<typeof loader>();
+
+  // Função para formatar data
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Função para retornar cor do status
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'novo': return { bg: 'rgba(34, 197, 94, 0.2)', color: '#22c55e' };
+      case 'respondido': return { bg: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6' };
+      case 'em_andamento': return { bg: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b' };
+      default: return { bg: 'rgba(156, 163, 175, 0.2)', color: '#9ca3af' };
+    }
+  };
 
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#0a0f1c',
+      background: 'linear-gradient(135deg, #0a0f1c 0%, #1a1a2e 50%, #16213e 100%)',
       color: '#e2e8f0',
       fontFamily: 'Inter, sans-serif'
     }}>
-      {/* Header */}
+      {/* Enhanced Header */}
       <header style={{
         background: 'rgba(26, 32, 44, 0.95)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid #334155',
-        padding: '1rem 0'
+        backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(14, 165, 233, 0.3)',
+        padding: '1rem 0',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
       }}>
         <div style={{
-          maxWidth: '1200px',
+          maxWidth: '1400px',
           margin: '0 auto',
           padding: '0 2rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
             <Link to="/" style={{
               color: '#0ea5e9',
               textDecoration: 'none',
-              fontSize: '1.5rem',
-              fontWeight: '700'
+              fontSize: '1.8rem',
+              fontWeight: '800',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}>
-              RaiseUp Admin
+              🚀 RaiseUp Admin
             </Link>
-            <nav style={{ display: 'flex', gap: '1rem' }}>
+            <nav style={{ display: 'flex', gap: '0.5rem' }}>
               <span style={{
                 color: '#0ea5e9',
-                padding: '0.5rem 1rem',
-                background: 'rgba(14, 165, 233, 0.1)',
-                borderRadius: '8px',
-                fontSize: '0.9rem'
+                padding: '0.75rem 1.5rem',
+                background: 'rgba(14, 165, 233, 0.15)',
+                borderRadius: '12px',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                border: '1px solid rgba(14, 165, 233, 0.3)'
               }}>
-                Dashboard
+                📊 Dashboard
               </span>
-              <span style={{
+              <Link to="/admin/contatos" style={{
                 color: '#94a3b8',
-                padding: '0.5rem 1rem',
-                fontSize: '0.9rem'
+                textDecoration: 'none',
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                borderRadius: '12px',
+                transition: 'all 0.3s ease'
               }}>
-                Contatos
-              </span>
-              <span style={{
+                📞 Contatos
+              </Link>
+              <Link to="/admin/artigos" style={{
                 color: '#94a3b8',
-                padding: '0.5rem 1rem',
-                fontSize: '0.9rem'
+                textDecoration: 'none',
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                borderRadius: '12px',
+                transition: 'all 0.3s ease'
               }}>
-                Artigos
-              </span>
+                📝 Artigos
+              </Link>
+              <Link to="/admin/analytics" style={{
+                color: '#94a3b8',
+                textDecoration: 'none',
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                borderRadius: '12px',
+                transition: 'all 0.3s ease'
+              }}>
+                📈 Analytics
+              </Link>
             </nav>
           </div>
-          <Link to="/" style={{
-            color: '#94a3b8',
-            textDecoration: 'none',
-            fontSize: '0.9rem'
-          }}>
-            ← Voltar ao Site
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{
+              padding: '0.5rem 1rem',
+              background: 'rgba(34, 197, 94, 0.1)',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              color: '#22c55e',
+              border: '1px solid rgba(34, 197, 94, 0.3)'
+            }}>
+              🟢 Sistema Online
+            </div>
+            <Link to="/admin/logout" style={{
+              color: '#f87171',
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              padding: '0.5rem 1rem',
+              borderRadius: '8px',
+              border: '1px solid rgba(248, 113, 113, 0.3)'
+            }}>
+              ← Sair
+            </Link>
+          </div>
         </div>
       </header>
 
       <main style={{
-        maxWidth: '1200px',
+        maxWidth: '1400px',
         margin: '0 auto',
         padding: '2rem'
       }}>
-        <h1 style={{
-          fontSize: '2rem',
-          fontWeight: '600',
-          marginBottom: '2rem',
-          color: '#f8fafc'
+        {/* Welcome Header */}
+        <div style={{
+          marginBottom: '3rem',
+          background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
+          padding: '2rem',
+          borderRadius: '20px',
+          border: '1px solid rgba(14, 165, 233, 0.2)'
         }}>
-          Dashboard Administrativo
-        </h1>
+          <h1 style={{
+            fontSize: '2.5rem',
+            fontWeight: '800',
+            marginBottom: '0.5rem',
+            color: '#f8fafc',
+            background: 'linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Dashboard RaiseUp
+          </h1>
+          <p style={{
+            fontSize: '1.1rem',
+            color: '#94a3b8',
+            margin: 0
+          }}>
+            Bem-vindo ao painel administrativo. Aqui você pode acompanhar todas as métricas importantes do seu negócio.
+          </p>
+        </div>
 
-        {/* Statistics Cards */}
+        {/* Enhanced Statistics Cards Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '1.5rem',
           marginBottom: '3rem'
         }}>
+          {/* Total Contacts Card */}
           <div style={{
             background: 'rgba(26, 32, 44, 0.8)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(14, 165, 233, 0.3)',
-            padding: '1.5rem',
-            borderRadius: '16px'
+            padding: '2rem',
+            borderRadius: '20px',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '100px',
+              height: '100px',
+              background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%)',
+              borderRadius: '0 20px 0 100px'
+            }}></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
-                <h3 style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                  Total de Contatos
+                <h3 style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: '600' }}>
+                  TOTAL DE CONTATOS
                 </h3>
-                <p style={{ fontSize: '2rem', fontWeight: '700', color: '#0ea5e9', margin: 0 }}>
+                <p style={{ fontSize: '2.5rem', fontWeight: '800', color: '#0ea5e9', margin: 0 }}>
                   {estatisticas.totalContatos}
                 </p>
               </div>
-              <span style={{ fontSize: '2rem', opacity: 0.7 }}>📞</span>
+              <div style={{
+                background: 'rgba(14, 165, 233, 0.15)',
+                padding: '0.75rem',
+                borderRadius: '12px',
+                fontSize: '1.5rem'
+              }}>
+                📞
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{
+                color: '#22c55e',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}>
+                +{estatisticas.crescimentoContatos}%
+              </span>
+              <span style={{ color: '#64748b', fontSize: '0.85rem' }}>vs mês anterior</span>
             </div>
           </div>
 
+          {/* Today's Contacts Card */}
           <div style={{
             background: 'rgba(26, 32, 44, 0.8)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(139, 92, 246, 0.3)',
-            padding: '1.5rem',
-            borderRadius: '16px'
+            padding: '2rem',
+            borderRadius: '20px',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '100px',
+              height: '100px',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%)',
+              borderRadius: '0 20px 0 100px'
+            }}></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
-                <h3 style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                  Contatos Hoje
+                <h3 style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: '600' }}>
+                  CONTATOS HOJE
                 </h3>
-                <p style={{ fontSize: '2rem', fontWeight: '700', color: '#8b5cf6', margin: 0 }}>
+                <p style={{ fontSize: '2.5rem', fontWeight: '800', color: '#8b5cf6', margin: 0 }}>
                   {estatisticas.contatosHoje}
                 </p>
               </div>
-              <span style={{ fontSize: '2rem', opacity: 0.7 }}>📅</span>
+              <div style={{
+                background: 'rgba(139, 92, 246, 0.15)',
+                padding: '0.75rem',
+                borderRadius: '12px',
+                fontSize: '1.5rem'
+              }}>
+                📅
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{
+                color: estatisticas.contatosHoje > estatisticas.contatosOntem ? '#22c55e' : '#f59e0b',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}>
+                {estatisticas.contatosHoje > estatisticas.contatosOntem ? '↗' : '→'} {estatisticas.contatosOntem} ontem
+              </span>
             </div>
           </div>
 
+          {/* Total Articles Card */}
           <div style={{
             background: 'rgba(26, 32, 44, 0.8)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(16, 185, 129, 0.3)',
-            padding: '1.5rem',
-            borderRadius: '16px'
+            padding: '2rem',
+            borderRadius: '20px',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '100px',
+              height: '100px',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%)',
+              borderRadius: '0 20px 0 100px'
+            }}></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
-                <h3 style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                  Total de Artigos
+                <h3 style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: '600' }}>
+                  ARTIGOS PUBLICADOS
                 </h3>
-                <p style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981', margin: 0 }}>
+                <p style={{ fontSize: '2.5rem', fontWeight: '800', color: '#10b981', margin: 0 }}>
                   {estatisticas.totalArtigos}
                 </p>
               </div>
-              <span style={{ fontSize: '2rem', opacity: 0.7 }}>📝</span>
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.15)',
+                padding: '0.75rem',
+                borderRadius: '12px',
+                fontSize: '1.5rem'
+              }}>
+                📝
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{
+                color: '#22c55e',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}>
+                +{estatisticas.crescimentoArtigos}%
+              </span>
+              <span style={{ color: '#64748b', fontSize: '0.85rem' }}>crescimento</span>
             </div>
           </div>
 
+          {/* Traffic Card */}
           <div style={{
             background: 'rgba(26, 32, 44, 0.8)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(245, 158, 11, 0.3)',
-            padding: '1.5rem',
-            borderRadius: '16px'
+            padding: '2rem',
+            borderRadius: '20px',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '100px',
+              height: '100px',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%)',
+              borderRadius: '0 20px 0 100px'
+            }}></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
-                <h3 style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                  Acessos (30 dias)
+                <h3 style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: '600' }}>
+                  TRÁFEGO (30 DIAS)
                 </h3>
-                <p style={{ fontSize: '2rem', fontWeight: '700', color: '#f59e0b', margin: 0 }}>
+                <p style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f59e0b', margin: 0 }}>
                   {(estatisticas.acessos30Dias / 1000).toFixed(1)}K
                 </p>
               </div>
-              <span style={{ fontSize: '2rem', opacity: 0.7 }}>📈</span>
+              <div style={{
+                background: 'rgba(245, 158, 11, 0.15)',
+                padding: '0.75rem',
+                borderRadius: '12px',
+                fontSize: '1.5rem'
+              }}>
+                📈
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{
+                color: '#22c55e',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}>
+                +{estatisticas.crescimentoAcessos}%
+              </span>
+              <span style={{ color: '#64748b', fontSize: '0.85rem' }}>vs período anterior</span>
             </div>
           </div>
         </div>
 
-        {/* Content Grid */}
+        {/* Additional Metrics Row */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1rem',
+          marginBottom: '3rem'
+        }}>
+          <div style={{
+            background: 'rgba(26, 32, 44, 0.6)',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            border: '1px solid rgba(71, 85, 105, 0.3)',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏱️</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e2e8f0', marginBottom: '0.25rem' }}>
+              {estatisticas.tempoMedioSessao}
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Tempo Médio</div>
+          </div>
+
+          <div style={{
+            background: 'rgba(26, 32, 44, 0.6)',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            border: '1px solid rgba(71, 85, 105, 0.3)',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📊</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e2e8f0', marginBottom: '0.25rem' }}>
+              {estatisticas.taxaConversao}%
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Taxa Conversão</div>
+          </div>
+
+          <div style={{
+            background: 'rgba(26, 32, 44, 0.6)',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            border: '1px solid rgba(71, 85, 105, 0.3)',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👥</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e2e8f0', marginBottom: '0.25rem' }}>
+              {estatisticas.usuariosAtivos}
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Usuários Ativos</div>
+          </div>
+
+          <div style={{
+            background: 'rgba(26, 32, 44, 0.6)',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            border: '1px solid rgba(71, 85, 105, 0.3)',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>💰</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e2e8f0', marginBottom: '0.25rem' }}>
+              R${metricas.ticketMedio}
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Ticket Médio</div>
+          </div>
+        </div>
+
+        {/* Enhanced Content Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
           gap: '2rem'
         }}>
-          {/* Recent Contacts */}
+          {/* Enhanced Recent Contacts */}
           <div style={{
             background: 'rgba(26, 32, 44, 0.8)',
             backdropFilter: 'blur(20px)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            border: '1px solid rgba(51, 65, 85, 0.3)'
+            padding: '2rem',
+            borderRadius: '20px',
+            border: '1px solid rgba(14, 165, 233, 0.3)',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '80px',
+              height: '80px',
+              background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%)',
+              borderRadius: '0 20px 0 80px'
+            }}></div>
+            
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1rem'
+              marginBottom: '1.5rem'
             }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0 }}>
-                Contatos Recentes
-              </h2>
-              <span style={{ color: '#0ea5e9', fontSize: '0.9rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{
+                  background: 'rgba(14, 165, 233, 0.15)',
+                  padding: '0.5rem',
+                  borderRadius: '10px',
+                  fontSize: '1.2rem'
+                }}>
+                  📞
+                </div>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: '700', margin: 0, color: '#f8fafc' }}>
+                  Contatos Recentes
+                </h2>
+              </div>
+              <Link to="/admin/contatos" style={{
+                color: '#0ea5e9',
+                fontSize: '0.9rem',
+                textDecoration: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(14, 165, 233, 0.3)',
+                transition: 'all 0.3s ease'
+              }}>
                 Ver todos →
-              </span>
+              </Link>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {contatosRecentes.map(contato => (
-                <div key={contato.id} style={{
-                  padding: '1rem',
-                  background: 'rgba(45, 55, 72, 0.5)',
-                  borderRadius: '8px',
-                  borderLeft: '3px solid #0ea5e9'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: '500' }}>{contato.nome}</span>
-                    <span style={{
-                      fontSize: '0.8rem',
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '4px',
-                      background: contato.status === 'novo' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(156, 163, 175, 0.2)',
-                      color: contato.status === 'novo' ? '#22c55e' : '#9ca3af'
-                    }}>
-                      {contato.status}
-                    </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {contatosRecentes.map(contato => {
+                const statusStyle = getStatusColor(contato.status);
+                return (
+                  <div key={contato.id} style={{
+                    padding: '1.5rem',
+                    background: 'rgba(45, 55, 72, 0.6)',
+                    borderRadius: '12px',
+                    borderLeft: '4px solid #0ea5e9',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <span style={{ fontWeight: '600', fontSize: '1rem', color: '#f8fafc' }}>
+                          {contato.nome}
+                        </span>
+                        <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                          {contato.email}
+                        </div>
+                      </div>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        padding: '0.375rem 0.75rem',
+                        borderRadius: '6px',
+                        background: statusStyle.bg,
+                        color: statusStyle.color,
+                        fontWeight: '600',
+                        textTransform: 'uppercase'
+                      }}>
+                        {contato.status === 'em_andamento' ? 'EM ANDAMENTO' : contato.status}
+                      </span>
+                    </div>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.5rem', fontSize: '0.8rem' }}>
+                      {contato.empresa && (
+                        <div style={{ color: '#94a3b8' }}>
+                          <span style={{ color: '#64748b' }}>Empresa:</span> {contato.empresa}
+                        </div>
+                      )}
+                      <div style={{ color: '#94a3b8' }}>
+                        <span style={{ color: '#64748b' }}>Interesse:</span> {contato.area_interesse}
+                      </div>
+                      <div style={{ color: '#94a3b8' }}>
+                        <span style={{ color: '#64748b' }}>Recebido:</span> {formatDate(contato.criado_em)}
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
-                    {contato.email}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
-          {/* Popular Articles */}
+          {/* Enhanced Popular Articles */}
           <div style={{
             background: 'rgba(26, 32, 44, 0.8)',
             backdropFilter: 'blur(20px)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            border: '1px solid rgba(51, 65, 85, 0.3)'
+            padding: '2rem',
+            borderRadius: '20px',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '80px',
+              height: '80px',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%)',
+              borderRadius: '0 20px 0 80px'
+            }}></div>
+            
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1rem'
+              marginBottom: '1.5rem'
             }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0 }}>
-                Artigos Populares
-              </h2>
-              <span style={{ color: '#0ea5e9', fontSize: '0.9rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{
+                  background: 'rgba(139, 92, 246, 0.15)',
+                  padding: '0.5rem',
+                  borderRadius: '10px',
+                  fontSize: '1.2rem'
+                }}>
+                  📝
+                </div>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: '700', margin: 0, color: '#f8fafc' }}>
+                  Artigos Populares
+                </h2>
+              </div>
+              <Link to="/admin/artigos" style={{
+                color: '#8b5cf6',
+                fontSize: '0.9rem',
+                textDecoration: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                transition: 'all 0.3s ease'
+              }}>
                 Gerenciar →
-              </span>
+              </Link>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {artigosPopulares.map(artigo => (
                 <div key={artigo.id} style={{
-                  padding: '1rem',
-                  background: 'rgba(45, 55, 72, 0.5)',
-                  borderRadius: '8px',
-                  borderLeft: '3px solid #8b5cf6'
+                  padding: '1.5rem',
+                  background: 'rgba(45, 55, 72, 0.6)',
+                  borderRadius: '12px',
+                  borderLeft: '4px solid #8b5cf6',
+                  transition: 'all 0.3s ease'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: '500', fontSize: '0.9rem' }}>
-                      {artigo.titulo}
-                    </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <Link to={`/blog/${artigo.slug}`} style={{
+                        fontWeight: '600',
+                        fontSize: '1rem',
+                        color: '#f8fafc',
+                        textDecoration: 'none',
+                        display: 'block'
+                      }}>
+                        {artigo.titulo}
+                      </Link>
+                      <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                        Por {artigo.autor}
+                      </div>
+                    </div>
                     <span style={{
+                      fontSize: '0.75rem',
+                      padding: '0.375rem 0.75rem',
+                      borderRadius: '6px',
+                      background: 'rgba(34, 197, 94, 0.2)',
+                      color: '#22c55e',
+                      fontWeight: '600',
+                      textTransform: 'uppercase'
+                    }}>
+                      ATIVO
+                    </span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <div style={{ color: '#94a3b8' }}>
+                        <span style={{ color: '#64748b' }}>👁️</span> {artigo.visualizacoes.toLocaleString()} views
+                      </div>
+                      <div style={{ color: '#94a3b8' }}>
+                        <span style={{
+                          color: artigo.crescimento > 0 ? '#22c55e' : '#64748b',
+                          fontWeight: '600'
+                        }}>
+                          {artigo.crescimento > 0 ? '↗' : '→'} +{artigo.crescimento}%
+                        </span>
+                      </div>
+                    </div>
+                    <Link to={`/admin/artigos/${artigo.id}`} style={{
+                      color: '#8b5cf6',
+                      textDecoration: 'none',
                       fontSize: '0.8rem',
                       padding: '0.25rem 0.5rem',
                       borderRadius: '4px',
-                      background: 'rgba(34, 197, 94, 0.2)',
-                      color: '#22c55e'
+                      border: '1px solid rgba(139, 92, 246, 0.3)'
                     }}>
-                      Ativo
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
-                    {artigo.visualizacoes} visualizações
+                      Editar
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -306,41 +703,214 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Sales & Performance Metrics */}
+        <div style={{
+          marginTop: '3rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '2rem',
+          marginBottom: '3rem'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%)',
+            padding: '2rem',
+            borderRadius: '20px',
+            border: '1px solid rgba(34, 197, 94, 0.3)'
+          }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', color: '#22c55e' }}>
+              📊 Métricas de Vendas
+            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <span style={{ color: '#94a3b8' }}>Vendas este mês</span>
+              <span style={{ fontSize: '1.5rem', fontWeight: '700', color: '#22c55e' }}>
+                {metricas.vendasMes}/{metricas.metaVendas}
+              </span>
+            </div>
+            <div style={{
+              width: '100%',
+              height: '8px',
+              background: 'rgba(34, 197, 94, 0.2)',
+              borderRadius: '4px',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: `${(metricas.vendasMes / metricas.metaVendas) * 100}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #22c55e 0%, #16a34a 100%)',
+                borderRadius: '4px'
+              }}></div>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem', margin: 0 }}>
+              {Math.round((metricas.vendasMes / metricas.metaVendas) * 100)}% da meta mensal
+            </p>
+          </div>
+
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%)',
+            padding: '2rem',
+            borderRadius: '20px',
+            border: '1px solid rgba(59, 130, 246, 0.3)'
+          }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', color: '#3b82f6' }}>
+              🎯 Geração de Leads
+            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <span style={{ color: '#94a3b8' }}>Leads este mês</span>
+              <span style={{ fontSize: '1.5rem', fontWeight: '700', color: '#3b82f6' }}>
+                {metricas.leadsMes}/{metricas.metaLeads}
+              </span>
+            </div>
+            <div style={{
+              width: '100%',
+              height: '8px',
+              background: 'rgba(59, 130, 246, 0.2)',
+              borderRadius: '4px',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: `${(metricas.leadsMes / metricas.metaLeads) * 100}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
+                borderRadius: '4px'
+              }}></div>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem', margin: 0 }}>
+              {Math.round((metricas.leadsMes / metricas.metaLeads) * 100)}% da meta mensal
+            </p>
+          </div>
+        </div>
+
+        {/* Enhanced Quick Actions */}
+        <div style={{
+          marginTop: '2rem',
+          padding: '2.5rem',
+          background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 50%, #7c3aed 100%)',
+          borderRadius: '24px',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-50%',
+            width: '200px',
+            height: '200px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '50%',
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            bottom: '-30%',
+            left: '-30%',
+            width: '150px',
+            height: '150px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '50%',
+          }}></div>
+          
+          <h2 style={{ color: 'white', marginBottom: '0.5rem', fontSize: '1.8rem', fontWeight: '800' }}>
+            🚀 Ações Rápidas
+          </h2>
+          <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '2rem', fontSize: '1rem' }}>
+            Acesse rapidamente as principais funcionalidades da plataforma
+          </p>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1rem',
+            maxWidth: '800px',
+            margin: '0 auto'
+          }}>
+            <Link to="/admin/contatos" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              color: 'white',
+              padding: '1.5rem',
+              borderRadius: '16px',
+              textDecoration: 'none',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📞</div>
+              <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Gerenciar Contatos</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Ver todos os leads</div>
+            </Link>
+
+            <Link to="/admin/artigos/novo" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              color: 'white',
+              padding: '1.5rem',
+              borderRadius: '16px',
+              textDecoration: 'none',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✍️</div>
+              <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Novo Artigo</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Criar conteúdo</div>
+            </Link>
+
+            <Link to="/admin/analytics" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              color: 'white',
+              padding: '1.5rem',
+              borderRadius: '16px',
+              textDecoration: 'none',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📈</div>
+              <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Analytics</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Relatórios</div>
+            </Link>
+
+            <Link to="/" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              color: 'white',
+              padding: '1.5rem',
+              borderRadius: '16px',
+              textDecoration: 'none',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🌐</div>
+              <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Ver Site</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Página principal</div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Footer */}
         <div style={{
           marginTop: '3rem',
           padding: '2rem',
-          background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)',
-          borderRadius: '16px',
-          textAlign: 'center'
+          textAlign: 'center',
+          borderTop: '1px solid rgba(71, 85, 105, 0.3)',
+          color: '#94a3b8'
         }}>
-          <h2 style={{ color: 'white', marginBottom: '1rem' }}>
-            Ações Rápidas
-          </h2>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/contato" style={{
-              display: 'inline-block',
-              background: 'rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}>
-              Ver Página de Contato
-            </Link>
-            <Link to="/blog" style={{
-              display: 'inline-block',
-              background: 'rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}>
-              Gerenciar Blog
-            </Link>
-          </div>
+          <p style={{ margin: 0, fontSize: '0.9rem' }}>
+            © 2025 RaiseUp - Automação com IA Humanizada | Dashboard Administrativo v1.0
+          </p>
+          <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem', opacity: 0.7 }}>
+            Satisfação do cliente: ⭐ {metricas.satisfacaoCliente}/5.0
+          </p>
         </div>
       </main>
     </div>
