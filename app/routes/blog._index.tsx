@@ -1,19 +1,9 @@
-import type { MetaFunction, LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import BlogLayout from "~/components/BlogLayout";
 import { buscarArtigosDestaque, buscarArtigosRegulares } from "~/lib/blog.server";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Blog RaiseUp | Automação com IA e Transformação Digital" },
-    { 
-      name: "description", 
-      content: "Descubra estratégias de automação empresarial, casos de sucesso e tendências em IA para negócios. Conteúdo especializado em transformação digital." 
-    },
-    { name: "keywords", content: "automação empresarial, IA para negócios, transformação digital, chatbot, produtividade" },
-  ];
-};
 
 export const loader = async () => {
   try {

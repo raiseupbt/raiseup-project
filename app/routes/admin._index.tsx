@@ -1,16 +1,10 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import { requireUser } from "~/lib/auth.server";
 import { supabase } from "~/lib/supabase.server";
 import AdminLayout from "~/components/AdminLayout";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Dashboard Admin - RaiseUp" },
-    { name: "robots", content: "noindex, nofollow" },
-  ];
-};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await requireUser(request);

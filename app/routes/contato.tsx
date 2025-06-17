@@ -1,15 +1,8 @@
-import type { MetaFunction, ActionFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useActionData, useNavigation } from "@remix-run/react";
 import { useEffect, useState } from "react";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Contato - RaiseUp | Consultoria em Automação com IA" },
-    { name: "description", content: "Entre em contato com a RaiseUp para transformar seu negócio com automações inteligentes. Consultoria gratuita em IA e transformação digital." },
-    { name: "keywords", content: "contato raiseup, consultoria IA, automação empresarial, transformação digital, agendamento consultoria" },
-  ];
-};
 
 export async function action({ request }: ActionFunctionArgs) {
   // Redireciona para a API route

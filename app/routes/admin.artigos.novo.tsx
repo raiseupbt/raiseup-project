@@ -1,15 +1,9 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useActionData, useNavigation, Form, Link } from "@remix-run/react";
 import { requireUser } from "~/lib/auth.server";
 import { supabase } from "~/lib/supabase.server";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Novo Artigo - Admin RaiseUp" },
-    { name: "robots", content: "noindex, nofollow" },
-  ];
-};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await requireUser(request);

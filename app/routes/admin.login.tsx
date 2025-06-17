@@ -1,16 +1,9 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useActionData, useNavigation, Form } from "@remix-run/react";
 import { useState } from "react";
 import { login, getUser, createUserSession } from "~/lib/auth.server";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Login Administrativo - RaiseUp" },
-    { name: "description", content: "Área administrativa da RaiseUp" },
-    { name: "robots", content: "noindex, nofollow" },
-  ];
-};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await getUser(request);

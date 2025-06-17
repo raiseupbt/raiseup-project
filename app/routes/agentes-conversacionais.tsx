@@ -1,12 +1,3 @@
-import type { MetaFunction } from "@remix-run/node";
-
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Agentes Conversacionais - RaiseUp | Chatbots Inteligentes com IA" },
-    { name: "description", content: "Transforme seu atendimento com agentes conversacionais que mantêm empatia e personalização. Chatbots 24/7, integração CRM e análise de sentimentos." },
-    { name: "keywords", content: "agentes conversacionais, chatbot inteligente, atendimento automatizado, IA conversacional, suporte 24/7" },
-  ];
-};
 
 export default function AgentesConversacionais() {
   return (

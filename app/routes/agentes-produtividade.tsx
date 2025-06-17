@@ -1,12 +1,3 @@
-import type { MetaFunction } from "@remix-run/node";
-
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Agentes de Produtividade - RaiseUp | Automação de Processos Empresariais" },
-    { name: "description", content: "Automatize processos internos e integre sistemas para máxima eficiência. Workflows automatizados, relatórios e gestão de tarefas inteligente." },
-    { name: "keywords", content: "automação processos, workflow automation, produtividade empresarial, integração sistemas, gestão tarefas" },
-  ];
-};
 
 export default function AgentesProdutividade() {
   return (

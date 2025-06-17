@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import BlogLayout from "~/components/BlogLayout";
@@ -38,23 +38,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   }
 };
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  if (!data?.post) {
-    return [
-      { title: "Post não encontrado | Blog RaiseUp" },
-    ];
-  }
-
-  const { post } = data;
-  return [
-    { title: `${post.titulo} | Blog RaiseUp` },
-    { name: "description", content: post.resumo },
-    { name: "keywords", content: post.tags.join(", ") },
-    { property: "og:title", content: post.titulo },
-    { property: "og:description", content: post.resumo },
-    { property: "og:type", content: "article" },
-  ];
-};
 
 export default function BlogPost() {
   const { post } = useLoaderData<typeof loader>();

@@ -1,12 +1,3 @@
-import type { MetaFunction } from "@remix-run/node";
-
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Agentes para Mídias Sociais - RaiseUp | Automação de Redes Sociais" },
-    { name: "description", content: "Automatize suas redes sociais mantendo autenticidade. Gestão de posts, resposta inteligente a comentários e análise de performance." },
-    { name: "keywords", content: "automação mídias sociais, gestão redes sociais, social media automation, marketing digital, engajamento automático" },
-  ];
-};
 
 export default function AgentesMidiasSociais() {
   return (
