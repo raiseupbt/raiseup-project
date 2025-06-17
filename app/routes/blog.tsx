@@ -1,10 +1,35 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
+import { supabase } from "~/lib/supabase.server";
 
 export const loader = async () => {
-  // Dados mockados para demonstração - blog articles about AI automation
-  return json({
-    artigos: [
+  try {
+    // Buscar artigos reais do Supabase
+    const { data: artigos, error } = await supabase
+      .from('artigos')
+      .select('*')
+      .eq('status', 'publicado')
+      .order('publicado_em', { ascending: false });
+
+    if (error) {
+      console.error('Erro ao buscar artigos:', error);
+    }
+
+    // Se não houver artigos ou houver erro, usar dados mockados
+    const artigosParaExibir = artigos && artigos.length > 0 ? artigos.map(artigo => ({
+      id: artigo.id,
+      titulo: artigo.titulo,
+      slug: artigo.slug,
+      resumo: artigo.resumo,
+      conteudo_preview: artigo.conteudo.substring(0, 150) + '...',
+      data_publicacao: artigo.publicado_em || artigo.criado_em,
+      autor: artigo.autor,
+      categoria: 'Automação com IA', // Categoria padrão
+      tempo_leitura: '5 min', // Calcular dinamicamente no futuro
+      tags: ['IA', 'Automação', 'Tecnologia'], // Tags padrão
+      imagem: artigo.imagem_url || 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80',
+      featured: artigo.featured || false
+    })) : [
       {
         id: '1',
         titulo: 'Como a IA está Transformando o Atendimento ao Cliente',
@@ -75,8 +100,34 @@ export const loader = async () => {
         imagem: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80',
         featured: false
       }
-    ]
-  });
+    ];
+
+    return json({
+      artigos: artigosParaExibir
+    });
+  } catch (error) {
+    console.error('Erro ao carregar blog:', error);
+    
+    // Fallback com dados mockados
+    return json({
+      artigos: [
+        {
+          id: '1',
+          titulo: 'Como a IA está Transformando o Atendimento ao Cliente',
+          slug: 'ia-transformando-atendimento-cliente',
+          resumo: 'Descubra como a inteligência artificial está revolucionando a forma como as empresas interagem com seus clientes.',
+          conteudo_preview: 'A revolução da IA no atendimento ao cliente não é sobre substituir o fator humano...',
+          data_publicacao: '2024-01-15',
+          autor: 'Equipe RaiseUp',
+          categoria: 'IA',
+          tempo_leitura: '5 min',
+          tags: ['IA', 'Atendimento', 'Tecnologia'],
+          imagem: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80',
+          featured: true
+        }
+      ]
+    });
+  }
 };
 
 export default function Blog() {

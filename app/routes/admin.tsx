@@ -1,11 +1,74 @@
-import { json } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
+import { requireUser } from "~/lib/auth.server";
+import { supabase } from "~/lib/supabase.server";
 
-export const loader = async () => {
-  // Dados mockados para demonstração - Dashboard completo
-  return json({
-    estatisticas: {
-      totalContatos: 42,
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  // Proteger rota com autenticação
+  await requireUser(request);
+
+  try {
+    // Buscar dados reais do Supabase
+    const { data: contatos, error: errorContatos } = await supabase
+      .from('contatos')
+      .select('*')
+      .order('criado_em', { ascending: false });
+
+    const { data: artigos, error: errorArtigos } = await supabase
+      .from('artigos')
+      .select('*')
+      .order('visualizacoes', { ascending: false });
+
+    // Calcular estatísticas
+    const totalContatos = contatos?.length || 0;
+    const totalArtigos = artigos?.length || 0;
+    const contatosHoje = contatos?.filter(c => {
+      const hoje = new Date().toDateString();
+      const dataContato = new Date(c.criado_em).toDateString();
+      return hoje === dataContato;
+    }).length || 0;
+
+    const contatosOntem = contatos?.filter(c => {
+      const ontem = new Date();
+      ontem.setDate(ontem.getDate() - 1);
+      const dataContato = new Date(c.criado_em).toDateString();
+      return ontem.toDateString() === dataContato;
+    }).length || 0;
+
+    // Dados para o dashboard
+    return json({
+      estatisticas: {
+        totalContatos,
+        totalArtigos,
+        contatosHoje,
+        contatosOntem,
+        acessos30Dias: 12500, // Placeholder - integrar com Analytics
+        crescimentoAcessos: 18,
+        crescimentoContatos: contatosHoje > contatosOntem ? Math.round(((contatosHoje - contatosOntem) / Math.max(contatosOntem, 1)) * 100) : 0,
+        crescimentoArtigos: 12,
+        tempoMedioSessao: '2m 45s',
+        taxaConversao: 3.2,
+        usuariosAtivos: 89,
+        paginasPopulares: 324
+      },
+      contatosRecentes: contatos?.slice(0, 4) || [],
+      artigosPopulares: artigos?.slice(0, 4) || [],
+      metricas: {
+        vendasMes: 15,
+        metaVendas: 20,
+        leadsMes: totalContatos,
+        metaLeads: 100,
+        satisfacaoCliente: 4.8,
+        ticketMedio: 2500
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao carregar dados do admin:', error);
+    
+    // Fallback com dados mockados em caso de erro
+    return json({
+      estatisticas: {
+        totalContatos: 0,
       totalArtigos: 8,
       contatosHoje: 3,
       contatosOntem: 5,
@@ -39,6 +102,7 @@ export const loader = async () => {
       ticketMedio: 2500
     }
   });
+  }
 };
 
 export default function Admin() {

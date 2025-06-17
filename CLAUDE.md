@@ -627,8 +627,8 @@ npm run dev
 ### **Contato RaiseUp**
 - **Site**: https://raiseup.com.br
 - **Email**: contato@raiseup.com.br
-- **WhatsApp**: +55 (11) 99999-9999
-- **Instagram**: @raiseupbrasil
+- **WhatsApp**: +55 (19) 98147-6177
+- **Instagram**: @raiseupbt
 
 ### **Suporte Técnico**
 - **Documentação**: Este arquivo CLAUDE.md
