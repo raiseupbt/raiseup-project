@@ -9,7 +9,7 @@ node_modules
 
 # Google Analytics credentials
 credentials/
-*.json
+raiseup-analytics-key.json
 raiseup-analytics-key.json*
 
 # Logs
