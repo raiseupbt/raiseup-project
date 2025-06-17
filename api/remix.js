@@ -1,10 +1,9 @@
-import { createRequestHandler } from "@remix-run/node";
-import { installGlobals } from "@remix-run/node";
-import * as build from "../build/index.js";
+const { createRequestHandler } = require("@remix-run/node");
+const { installGlobals } = require("@remix-run/node");
 
 installGlobals();
 
-export default createRequestHandler({
-  build,
+module.exports = createRequestHandler({
+  build: require("../build/index.js"),
   mode: process.env.NODE_ENV,
 });
