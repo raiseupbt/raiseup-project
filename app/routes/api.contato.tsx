@@ -35,14 +35,31 @@ export async function action({ request }: ActionFunctionArgs) {
       mensagem: formData.get('message')?.toString() || ''
     };
 
-    // Validar dados
-    const erros = validarFormularioContato(dadosFormulario);
+    // Debug dos dados recebidos
+    console.log('Dados do formulário recebidos:', dadosFormulario);
+    
+    // Validação simplificada para debug
+    const erros = [];
+    if (!dadosFormulario.nome || dadosFormulario.nome.length < 2) {
+      erros.push({ campo: 'nome', mensagem: `Nome inválido: "${dadosFormulario.nome}"` });
+    }
+    if (!dadosFormulario.email || !dadosFormulario.email.includes('@')) {
+      erros.push({ campo: 'email', mensagem: `Email inválido: "${dadosFormulario.email}"` });
+    }
+    if (!dadosFormulario.telefone || dadosFormulario.telefone.length < 8) {
+      erros.push({ campo: 'telefone', mensagem: `Telefone inválido: "${dadosFormulario.telefone}"` });
+    }
+    if (!dadosFormulario.area_interesse) {
+      erros.push({ campo: 'area_interesse', mensagem: `Área inválida: "${dadosFormulario.area_interesse}"` });
+    }
+    
     if (erros.length > 0) {
+      console.log('Erros de validação:', erros);
       return json({ erros }, { status: 400 });
     }
 
     // Simular sucesso até configurar Supabase
-    console.log('Contato recebido:', dadosFormulario);
+    console.log('Contato válido recebido:', dadosFormulario);
 
     return json({ 
       sucesso: true, 
