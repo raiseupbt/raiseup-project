@@ -1,7 +1,6 @@
 module.exports = {
   ignoredRouteFiles: ["**/.*"],
-  serverBuildTarget: "vercel",
-  server: "./server.js",
+  serverBuildTarget: "node-cjs",
   serverModuleFormat: "cjs",
   serverDependenciesToBundle: ["marked"],
 };

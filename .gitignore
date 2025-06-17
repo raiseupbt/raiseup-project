@@ -12,6 +12,10 @@ credentials/
 raiseup-analytics-key.json
 raiseup-analytics-key.json*
 
+# MCP Configuration (contains tokens)
+.mcp.json
+.claude/
+
 # Logs
 *.log
 server.log
