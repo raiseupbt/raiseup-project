@@ -7,8 +7,11 @@ RUN apk add --no-cache libc6-compat
 # Criar diretório da aplicação
 WORKDIR /app
 
-# Copiar package.json e package-lock.json
+# Copiar arquivos de configuração primeiro
 COPY package*.json ./
+COPY tsconfig.json ./
+COPY remix.config.js ./
+COPY remix.env.d.ts ./
 
 # Instalar dependências (incluindo dev para build)
 RUN npm install
