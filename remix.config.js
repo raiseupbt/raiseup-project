@@ -1,6 +1,7 @@
 module.exports = {
   ignoredRouteFiles: ["**/.*"],
-  serverBuildTarget: "node-cjs",
   serverModuleFormat: "cjs",
   serverDependenciesToBundle: ["marked"],
+  assetsBuildDirectory: "public/build",
+  publicPath: "/build/",
 };
