@@ -1,0 +1,40 @@
+{
+  "name": "raiseup-website",
+  "private": true,
+  "sideEffects": false,
+  "scripts": {
+    "build": "remix build",
+    "dev": "remix dev",
+    "start": "remix-serve ./build/index.js",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@google-analytics/data": "^5.1.0",
+    "@remix-run/dev": "^2.5.1",
+    "@remix-run/node": "^2.5.1",
+    "@remix-run/react": "^2.5.1",
+    "@remix-run/serve": "^2.5.1",
+    "@supabase/supabase-js": "^2.50.0",
+    "@types/dompurify": "^3.2.0",
+    "bcryptjs": "^3.0.2",
+    "dompurify": "^3.2.6",
+    "dotenv": "^16.5.0",
+    "isbot": "^4",
+    "isomorphic-dompurify": "^2.25.0",
+    "jsdom": "^26.1.0",
+    "marked": "^15.0.12",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.1.6",
+    "vite": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "@types/jsdom": "^21.1.7",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
