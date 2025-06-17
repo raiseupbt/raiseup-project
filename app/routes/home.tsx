@@ -1,11 +1,3 @@
-import type { MetaFunction } from "@remix-run/node";
-
-export const meta: MetaFunction = () => {
-  return [
-    { title: "RaiseUp - Home Test" }
-  ];
-};
-
 export default function Home() {
   return (
     <div style={{ 
