@@ -40,11 +40,30 @@ function getAnalyticsClient() {
       // Opção 3: Variáveis separadas (para evitar limite de tamanho)
       else if (GOOGLE_PROJECT_ID && GOOGLE_PRIVATE_KEY && GOOGLE_CLIENT_EMAIL) {
         try {
+          // Normalizar a chave privada
+          let privateKey = GOOGLE_PRIVATE_KEY.trim();
+          
+          // Garantir que tenha as quebras de linha corretas
+          if (!privateKey.includes('\n')) {
+            privateKey = privateKey.replace(/\\n/g, '\n');
+          }
+          
+          // Garantir formato correto da chave
+          if (!privateKey.startsWith('-----BEGIN PRIVATE KEY-----')) {
+            privateKey = '-----BEGIN PRIVATE KEY-----\n' + privateKey;
+          }
+          if (!privateKey.endsWith('-----END PRIVATE KEY-----')) {
+            privateKey = privateKey + '\n-----END PRIVATE KEY-----';
+          }
+          
+          console.log('Private key processada (primeiros 50 chars):', privateKey.substring(0, 50));
+          console.log('Private key termina com:', privateKey.slice(-30));
+          
           const credentials = {
             type: "service_account",
             project_id: GOOGLE_PROJECT_ID,
             private_key_id: "1d1d976ce8456310a6594f9e843d392e8a4221d5",
-            private_key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            private_key: privateKey,
             client_email: GOOGLE_CLIENT_EMAIL,
             client_id: "102841302921530136815",
             auth_uri: "https://accounts.google.com/o/oauth2/auth",
@@ -53,9 +72,11 @@ function getAnalyticsClient() {
             client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${GOOGLE_CLIENT_EMAIL.replace('@', '%40')}`,
             universe_domain: "googleapis.com"
           };
+          
           console.log('Credenciais do Google Analytics carregadas com sucesso via variáveis separadas');
           analyticsDataClient = new BetaAnalyticsDataClient({
-            credentials
+            credentials,
+            fallback: true // Use REST instead of gRPC if needed
           });
         } catch (parseError) {
           console.error('Erro ao criar credenciais a partir de variáveis separadas:', parseError);

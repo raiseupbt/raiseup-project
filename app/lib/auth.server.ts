@@ -42,20 +42,6 @@ export async function getUser(request: Request): Promise<Usuario | null> {
   console.log('=== GET USER ===');
   console.log('User ID da sessão:', userId);
 
-  // Verificar se é o usuário temporário (TEMPORÁRIO - remover depois)
-  if (userId === 'temp-admin-1') {
-    console.log('⚠️ ATENÇÃO: Ainda usando usuário temporário!');
-    console.log('Para testar login real, faça logout em /admin/logout');
-    return {
-      id: 'temp-admin-1',
-      email: 'admin@raiseup.com.br',
-      nome: 'Administrador RaiseUp (TEMPORÁRIO)',
-      ativo: true,
-      ultimo_login: new Date().toISOString(),
-      criado_em: new Date().toISOString(),
-      atualizado_em: new Date().toISOString()
-    };
-  }
 
   console.log('Buscando usuário no Supabase...');
   const { data, error } = await supabase
@@ -142,41 +128,12 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
       }
     }
     
-    console.log('Não foi possível autenticar via Supabase, tentando credenciais temporárias...');
-    
-    // Fallback para credenciais temporárias apenas se Supabase falhar
-    if (emailSanitizado === 'admin@raiseup.com.br' && senha === 'admin123') {
-      console.log('Login bem-sucedido com credenciais temporárias (fallback)');
-      return {
-        id: 'temp-admin-1',
-        email: 'admin@raiseup.com.br',
-        nome: 'Administrador RaiseUp (Temporário)',
-        ativo: true,
-        ultimo_login: new Date().toISOString(),
-        criado_em: new Date().toISOString(),
-        atualizado_em: new Date().toISOString()
-      };
-    }
+    console.log('Não foi possível autenticar via Supabase.');
     
     console.log('Credenciais inválidas');
     return null;
   } catch (error) {
     console.error('Erro na autenticação:', error);
-    
-    // Em caso de erro, tentar credenciais temporárias como último recurso
-    if (emailSanitizado === 'admin@raiseup.com.br' && senha === 'admin123') {
-      console.log('Login com credenciais temporárias devido a erro no Supabase');
-      return {
-        id: 'temp-admin-1',
-        email: 'admin@raiseup.com.br',
-        nome: 'Administrador RaiseUp (Modo Emergência)',
-        ativo: true,
-        ultimo_login: new Date().toISOString(),
-        criado_em: new Date().toISOString(),
-        atualizado_em: new Date().toISOString()
-      };
-    }
-    
     return null;
   }
 }
