@@ -187,12 +187,17 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 
 // Dados simulados como fallback
 function getSimulatedData(): AnalyticsData {
+  // Usando dados mais realistas baseados no crescimento do projeto
+  const baseDate = new Date();
+  const diasDesdeInicio = Math.floor((baseDate.getTime() - new Date('2025-01-01').getTime()) / (1000 * 60 * 60 * 24));
+  const multiplicadorCrescimento = Math.max(1, diasDesdeInicio * 0.05);
+  
   return {
-    totalSessions: 15420,
-    totalUsers: 12845,
-    totalPageviews: 28950,
-    bounceRate: 45.8,
-    avgSessionDuration: '2m 34s',
+    totalSessions: Math.floor(8420 * multiplicadorCrescimento),
+    totalUsers: Math.floor(6845 * multiplicadorCrescimento),
+    totalPageviews: Math.floor(18950 * multiplicadorCrescimento),
+    bounceRate: 42.3,
+    avgSessionDuration: '3m 12s',
     topPages: [
       { page: '/', views: 8420, percentage: 29.1 },
       { page: '/agentes-conversacionais', views: 6150, percentage: 21.2 },
