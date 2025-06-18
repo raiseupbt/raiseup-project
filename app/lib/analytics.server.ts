@@ -3,16 +3,27 @@ import { BetaAnalyticsDataClient } from '@google-analytics/data';
 // Configuração do Google Analytics 4
 const GA4_PROPERTY_ID = process.env.GA4_PROPERTY_ID;
 const GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+const GOOGLE_CREDENTIALS_JSON = process.env.GOOGLE_CREDENTIALS_JSON;
 
 let analyticsDataClient: BetaAnalyticsDataClient | null = null;
 
 // Inicializar cliente do Google Analytics
 function getAnalyticsClient() {
-  if (!analyticsDataClient && GOOGLE_APPLICATION_CREDENTIALS && GA4_PROPERTY_ID) {
+  if (!analyticsDataClient && GA4_PROPERTY_ID) {
     try {
-      analyticsDataClient = new BetaAnalyticsDataClient({
-        keyFilename: GOOGLE_APPLICATION_CREDENTIALS
-      });
+      // Opção 1: Arquivo de credenciais
+      if (GOOGLE_APPLICATION_CREDENTIALS) {
+        analyticsDataClient = new BetaAnalyticsDataClient({
+          keyFilename: GOOGLE_APPLICATION_CREDENTIALS
+        });
+      }
+      // Opção 2: JSON como string na variável de ambiente
+      else if (GOOGLE_CREDENTIALS_JSON) {
+        const credentials = JSON.parse(GOOGLE_CREDENTIALS_JSON);
+        analyticsDataClient = new BetaAnalyticsDataClient({
+          credentials
+        });
+      }
     } catch (error) {
       console.error('Erro ao inicializar Google Analytics:', error);
     }
@@ -37,6 +48,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   console.log('=== DEBUG GOOGLE ANALYTICS ===');
   console.log('GA4_PROPERTY_ID:', GA4_PROPERTY_ID ? 'Configurado' : 'NÃO CONFIGURADO');
   console.log('GOOGLE_APPLICATION_CREDENTIALS:', GOOGLE_APPLICATION_CREDENTIALS ? 'Configurado' : 'NÃO CONFIGURADO');
+  console.log('GOOGLE_CREDENTIALS_JSON:', GOOGLE_CREDENTIALS_JSON ? 'Configurado' : 'NÃO CONFIGURADO');
   
   const client = getAnalyticsClient();
   

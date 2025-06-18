@@ -27,9 +27,41 @@ export default function AdminLayout({
     <>
       <style dangerouslySetInnerHTML={{
         __html: `
+          /* Reset global para admin */
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            overflow-x: hidden !important;
+          }
+          
+          #root, [data-remix-root] {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+          }
+          
+          .admin-container {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100vw !important;
+            min-height: 100vh !important;
+            position: relative !important;
+          }
+          
           @media (max-width: 768px) {
+            html, body {
+              font-size: 14px !important;
+            }
+            
             .admin-header {
               padding: 0.75rem 1rem !important;
+              position: fixed !important;
+              width: 100% !important;
+              left: 0 !important;
+              right: 0 !important;
             }
             
             .admin-header-content {
@@ -102,11 +134,15 @@ export default function AdminLayout({
         `
       }} />
       
-      <div style={{
+      <div className="admin-container" style={{
         minHeight: '100vh',
+        width: '100vw',
+        margin: 0,
+        padding: 0,
         background: 'linear-gradient(135deg, #0a0f1c 0%, #1a202c 100%)',
         color: '#f8fafc',
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        position: 'relative'
       }}>
       {/* Header */}
       <header className="admin-header" style={{

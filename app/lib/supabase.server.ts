@@ -6,15 +6,23 @@ const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 let supabase: any;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Variáveis de ambiente do Supabase não configuradas');
+  console.error('=== ERRO SUPABASE ===');
+  console.error('SUPABASE_URL:', supabaseUrl ? '✅ Configurada' : '❌ NÃO CONFIGURADA');
+  console.error('SUPABASE_ANON_KEY:', supabaseAnonKey ? '✅ Configurada' : '❌ NÃO CONFIGURADA');
+  console.error('USANDO CLIENTE MOCK - DADOS REAIS NÃO FUNCIONARÃO');
+  
   // Criar cliente mock para não quebrar o build
   supabase = {
     from: () => ({
-      select: () => Promise.resolve({ data: [], error: null }),
-      insert: () => Promise.resolve({ data: null, error: null })
+      select: () => Promise.resolve({ data: [], error: { message: 'Supabase não configurado' } }),
+      insert: () => Promise.resolve({ data: null, error: { message: 'Supabase não configurado' } }),
+      update: () => Promise.resolve({ data: null, error: { message: 'Supabase não configurado' } })
     })
   };
 } else {
+  console.log('=== SUPABASE CONECTADO ===');
+  console.log('URL:', supabaseUrl);
+  console.log('Chave configurada:', supabaseAnonKey ? 'Sim' : 'Não');
   supabase = createClient(supabaseUrl, supabaseAnonKey);
 }
 
