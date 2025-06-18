@@ -39,14 +39,32 @@ export async function getUser(request: Request): Promise<Usuario | null> {
   const userId = await getUserId(request);
   if (!userId) return null;
 
-  // Removido usuário temporário por segurança - usar apenas banco de dados
+  console.log('=== GET USER ===');
+  console.log('User ID da sessão:', userId);
 
+  // Verificar se é o usuário temporário
+  if (userId === 'temp-admin-1') {
+    console.log('Retornando usuário temporário');
+    return {
+      id: 'temp-admin-1',
+      email: 'admin@raiseup.com.br',
+      nome: 'Administrador RaiseUp',
+      ativo: true,
+      ultimo_login: new Date().toISOString(),
+      criado_em: new Date().toISOString(),
+      atualizado_em: new Date().toISOString()
+    };
+  }
+
+  console.log('Buscando usuário no Supabase...');
   const { data, error } = await supabase
     .from('usuarios')
     .select('*')
     .eq('id', userId)
     .eq('ativo', true)
     .single();
+
+  console.log('Resultado da busca:', { data, error });
 
   if (error || !data) return null;
   return data;

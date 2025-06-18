@@ -17,18 +17,14 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
       .from('artigos')
       .select('*')
       .eq('slug', slug)
-      .eq('status', 'publicado')
+      .eq('ativo', true)
       .single();
 
     if (error || !artigo) {
       throw new Response("Artigo não encontrado", { status: 404 });
     }
 
-    // Incrementar visualizações
-    await supabase
-      .from('artigos')
-      .update({ visualizacoes: (artigo.visualizacoes || 0) + 1 })
-      .eq('id', artigo.id);
+    // Remover incremento de visualizações
     
     // Converter markdown para HTML
     const htmlContent = await marked(artigo.conteudo || artigo.resumo);
@@ -39,12 +35,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
         titulo: artigo.titulo,
         slug: artigo.slug,
         resumo: artigo.resumo,
-        data_publicacao: artigo.publicado_em || artigo.criado_em,
+        data_publicacao: artigo.data_publicacao || artigo.criado_em,
         autor: artigo.autor,
-        tempo_leitura: '5 min', // Calcular no futuro
-        tags: ['IA', 'Automação', 'Tecnologia'], // Tags padrão
-        htmlContent,
-        visualizacoes: (artigo.visualizacoes || 0) + 1
+        tempo_leitura: artigo.tempo_leitura || '5 min',
+        tags: artigo.tags || ['IA', 'Automação', 'Tecnologia'],
+        htmlContent
       }
     });
   } catch (error) {
@@ -84,8 +79,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
           </ol>
 
           <p>Com a estratégia certa, sua empresa pode oferecer um atendimento excepcional mantendo o toque humano.</p>
-        `,
-        visualizacoes: 1
+        `
       }
     });
   }
@@ -358,7 +352,7 @@ export default function BlogPost() {
             
             <div className="article-meta">
               <span className="article-date">
-                📅 {new Date(post.data_publicacao).toLocaleDateString('pt-BR')} • ⏱️ {post.tempo_leitura} • 👁️ {post.visualizacoes} visualizações
+                📅 {new Date(post.data_publicacao).toLocaleDateString('pt-BR')} • ⏱️ {post.tempo_leitura} • 👤 {post.autor}
               </span>
             </div>
 

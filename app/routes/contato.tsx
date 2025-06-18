@@ -522,12 +522,12 @@ export default function Contato() {
                   required
                 >
                   <option value="">Selecione uma área de interesse</option>
-                  <option value="Agentes Conversacionais">Agentes Conversacionais</option>
-                  <option value="Agentes de Mídias Sociais">Agentes de Mídias Sociais</option>
-                  <option value="Agentes de Produtividade">Agentes de Produtividade</option>
-                  <option value="Consultoria em IA">Consultoria em IA</option>
-                  <option value="Integração de Sistemas">Integração de Sistemas</option>
-                  <option value="Outros">Outros</option>
+                  <option value="conversacional">Agentes Conversacionais</option>
+                  <option value="midias-sociais">Agentes de Mídias Sociais</option>
+                  <option value="produtividade">Agentes de Produtividade</option>
+                  <option value="consultoria">Consultoria em IA</option>
+                  <option value="integracao">Integração de Sistemas</option>
+                  <option value="outros">Outros</option>
                 </select>
               </div>
 
