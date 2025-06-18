@@ -1,9 +1,10 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData, Form } from "@remix-run/react";
+import { useLoaderData, Form, useNavigation } from "@remix-run/react";
 import { requireUser } from "~/lib/auth.server";
 import { getAnalyticsData } from "~/lib/analytics.server";
 import AdminLayout from "~/components/AdminLayout";
+import { Suspense, useState, useEffect } from "react";
 
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -36,6 +37,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function AdminAnalytics() {
   const { user, analyticsData, currentPeriod } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
   
   const periodLabels: Record<string, string> = {
     'today': 'Hoje',
@@ -43,6 +46,15 @@ export default function AdminAnalytics() {
     '30daysAgo': 'Últimos 30 dias',
     '90daysAgo': 'Últimos 90 dias'
   };
+
+  // Detectar quando está carregando dados
+  useEffect(() => {
+    if (navigation.state === 'loading') {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [navigation.state]);
 
   return (
     <>
@@ -125,6 +137,29 @@ export default function AdminAnalytics() {
               font-size: 0.8rem !important;
             }
           }
+          
+          /* Skeleton loading animations */
+          @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+          }
+          
+          .skeleton {
+            background: linear-gradient(90deg, #1a202c 25%, #2d3748 50%, #1a202c 75%);
+            background-size: 200px 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+          }
+          
+          .loading-overlay {
+            filter: blur(2px);
+            opacity: 0.6;
+            pointer-events: none;
+          }
+          
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
         `
       }} />
       
@@ -180,12 +215,41 @@ export default function AdminAnalytics() {
         </div>
 
         {/* Cards de Estatísticas */}
-        <div className="analytics-stats-grid" style={{
+        <div className={`analytics-stats-grid ${isLoading ? 'loading-overlay' : ''}`} style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
           gap: '1.5rem',
-          marginBottom: '2rem'
+          marginBottom: '2rem',
+          position: 'relative'
         }}>
+          {isLoading && (
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 10,
+              background: 'rgba(26, 32, 44, 0.95)',
+              padding: '1rem 2rem',
+              borderRadius: '8px',
+              border: '1px solid rgba(51, 65, 85, 0.3)',
+              color: '#0ea5e9',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <div style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid rgba(14, 165, 233, 0.3)',
+                borderRadius: '50%',
+                borderTopColor: '#0ea5e9',
+                animation: 'spin 1s linear infinite'
+              }} />
+              Atualizando dados...
+            </div>
+          )}
           <StatCard
             title="Total de Sessões"
             value={analyticsData.totalSessions.toLocaleString()}
@@ -221,18 +285,16 @@ export default function AdminAnalytics() {
             color="#ef4444"
             icon="⏱️"
           />
-          {analyticsData.realtimeUsers !== undefined && (
-            <StatCard
-              title="Online Agora"
-              value={analyticsData.realtimeUsers.toString()}
-              subtitle="Usuários ativos"
-              color="#10b981"
-              icon="🟢"
-            />
-          )}
+          <StatCard
+            title="Online Agora"
+            value={analyticsData.realtimeUsers.toString()}
+            subtitle="Usuários ativos"
+            color="#10b981"
+            icon="🟢"
+          />
         </div>
 
-        <div className="analytics-content-grid" style={{
+        <div className={`analytics-content-grid ${isLoading ? 'loading-overlay' : ''}`} style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
           gap: '2rem'
@@ -407,16 +469,16 @@ export default function AdminAnalytics() {
         }}>
           🚀 <strong>Analytics Avançado v2.0</strong> - Dados em tempo real, horários de pico e muito mais!
         </div>
-        {/* Sempre mostrar as seções para debug - remover condição temporariamente */}
-        {true && (
-          <div className="analytics-content-grid" style={{
+        {/* Seções Avançadas Sempre Disponíveis */}
+        {(
+          <div className={`analytics-content-grid ${isLoading ? 'loading-overlay' : ''}`} style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
             gap: '2rem',
             marginTop: '2rem'
           }}>
             {/* Horários de Pico */}
-            {(analyticsData.hourlyData || true) && (
+            {(
               <div className="analytics-content-card" style={{
                 background: 'rgba(26, 32, 44, 0.8)',
                 backdropFilter: 'blur(20px)',
@@ -443,12 +505,7 @@ export default function AdminAnalytics() {
                   fontSize: '0.75rem',
                   color: '#94a3b8'
                 }}>
-                  {(analyticsData.hourlyData || [
-                    { hour: '0:00', sessions: 120 }, { hour: '6:00', sessions: 245 }, 
-                    { hour: '9:00', sessions: 520 }, { hour: '12:00', sessions: 820 },
-                    { hour: '14:00', sessions: 920 }, { hour: '18:00', sessions: 520 },
-                    { hour: '21:00', sessions: 320 }
-                  ]).map((hour, index) => (
+                  {analyticsData.hourlyData.map((hour, index) => (
                     <div key={hour.hour} style={{
                       textAlign: 'center',
                       padding: '0.5rem 0.25rem',
@@ -465,7 +522,7 @@ export default function AdminAnalytics() {
             )}
 
             {/* Termos de Busca */}
-            {(analyticsData.searchTerms?.length > 0 || true) && (
+            {analyticsData.searchTerms.length > 0 && (
               <div className="analytics-content-card" style={{
                 background: 'rgba(26, 32, 44, 0.8)',
                 backdropFilter: 'blur(20px)',
@@ -485,12 +542,7 @@ export default function AdminAnalytics() {
                 }}>
                   🔍 Termos de Busca
                 </h2>
-                {(analyticsData.searchTerms || [
-                  { term: 'automação empresarial', sessions: 1250 },
-                  { term: 'chatbot whatsapp', sessions: 890 },
-                  { term: 'agente conversacional', sessions: 650 },
-                  { term: 'IA para empresas', sessions: 420 }
-                ]).map((term, index) => (
+                {analyticsData.searchTerms.map((term, index) => (
                   <ProgressBar
                     key={term.term}
                     label={term.term}
@@ -503,7 +555,7 @@ export default function AdminAnalytics() {
             )}
 
             {/* Usuários Novos vs Recorrentes */}
-            {(analyticsData.newVsReturning || true) && (
+            {(
               <div className="analytics-content-card" style={{
                 background: 'rgba(26, 32, 44, 0.8)',
                 backdropFilter: 'blur(20px)',
@@ -523,10 +575,7 @@ export default function AdminAnalytics() {
                 }}>
                   👥 Novos vs Recorrentes
                 </h2>
-                {(analyticsData.newVsReturning || [
-                  { type: 'Novos', users: 4450, percentage: 65.0 },
-                  { type: 'Recorrentes', users: 2395, percentage: 35.0 }
-                ]).map((segment, index) => (
+                {analyticsData.newVsReturning.map((segment, index) => (
                   <ProgressBar
                     key={segment.type}
                     label={segment.type}
@@ -558,26 +607,21 @@ export default function AdminAnalytics() {
               }}>
                 📈 Tempo na Página
               </h2>
-              {[
-                { page: '/', time: '3m 45s', color: '#0ea5e9' },
-                { page: '/agentes-conversacionais', time: '2m 18s', color: '#10b981' },
-                { page: '/contato', time: '1m 52s', color: '#8b5cf6' },
-                { page: '/blog', time: '4m 12s', color: '#f59e0b' }
-              ].map((item, index) => (
+              {analyticsData.pageEngagement.map((item, index) => (
                 <div key={item.page} style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
                   alignItems: 'center',
                   marginBottom: '1rem',
                   padding: '0.75rem',
-                  background: `${item.color}15`,
+                  background: `${['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b'][index % 4]}15`,
                   borderRadius: '8px',
-                  border: `1px solid ${item.color}30`
+                  border: `1px solid ${['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b'][index % 4]}30`
                 }}>
                   <span style={{ color: '#e2e8f0', fontSize: '0.9rem' }}>
                     {item.page === '/' ? 'Página Inicial' : item.page}
                   </span>
-                  <span style={{ color: item.color, fontWeight: '600' }}>
+                  <span style={{ color: ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b'][index % 4], fontWeight: '600' }}>
                     {item.time}
                   </span>
                 </div>
@@ -604,12 +648,7 @@ export default function AdminAnalytics() {
               }}>
                 ⚡ Performance
               </h2>
-              {[
-                { metric: 'Tempo de Carregamento', value: '1.2s', status: 'excellent', color: '#10b981' },
-                { metric: 'First Contentful Paint', value: '0.8s', status: 'good', color: '#10b981' },
-                { metric: 'Core Web Vitals', value: '95/100', status: 'excellent', color: '#10b981' },
-                { metric: 'Taxa de Erro', value: '0.1%', status: 'excellent', color: '#10b981' }
-              ].map((item, index) => (
+              {analyticsData.performance.map((item, index) => (
                 <div key={item.metric} style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
@@ -650,12 +689,7 @@ export default function AdminAnalytics() {
               }}>
                 🎯 Conversões
               </h2>
-              {[
-                { goal: 'Formulário de Contato', conversions: 47, rate: '3.2%', color: '#0ea5e9' },
-                { goal: 'Download de Material', conversions: 23, rate: '1.8%', color: '#8b5cf6' },
-                { goal: 'Clique no WhatsApp', conversions: 89, rate: '6.1%', color: '#10b981' },
-                { goal: 'Tempo > 3min na página', conversions: 156, rate: '12.4%', color: '#f59e0b' }
-              ].map((item, index) => (
+              {analyticsData.conversions.map((item, index) => (
                 <div key={item.goal} style={{ marginBottom: '1rem' }}>
                   <div style={{
                     display: 'flex',
