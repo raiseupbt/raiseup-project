@@ -5,6 +5,11 @@ const GA4_PROPERTY_ID = process.env.GA4_PROPERTY_ID;
 const GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 const GOOGLE_CREDENTIALS_JSON = process.env.GOOGLE_CREDENTIALS_JSON;
 
+// Alternativa: usar variáveis separadas
+const GOOGLE_PROJECT_ID = process.env.GOOGLE_PROJECT_ID;
+const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
+const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
+
 let analyticsDataClient: BetaAnalyticsDataClient | null = null;
 
 // Inicializar cliente do Google Analytics
@@ -23,13 +28,37 @@ function getAnalyticsClient() {
           // Limpar e normalizar o JSON
           const cleanJson = GOOGLE_CREDENTIALS_JSON.trim().replace(/\s+/g, ' ');
           const credentials = JSON.parse(cleanJson);
-          console.log('Credenciais do Google Analytics carregadas com sucesso');
+          console.log('Credenciais do Google Analytics carregadas com sucesso via JSON');
           analyticsDataClient = new BetaAnalyticsDataClient({
             credentials
           });
         } catch (parseError) {
           console.error('Erro ao fazer parse das credenciais JSON:', parseError);
           console.error('JSON recebido:', GOOGLE_CREDENTIALS_JSON?.substring(0, 100) + '...');
+        }
+      }
+      // Opção 3: Variáveis separadas (para evitar limite de tamanho)
+      else if (GOOGLE_PROJECT_ID && GOOGLE_PRIVATE_KEY && GOOGLE_CLIENT_EMAIL) {
+        try {
+          const credentials = {
+            type: "service_account",
+            project_id: GOOGLE_PROJECT_ID,
+            private_key_id: "1d1d976ce8456310a6594f9e843d392e8a4221d5",
+            private_key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            client_email: GOOGLE_CLIENT_EMAIL,
+            client_id: "102841302921530136815",
+            auth_uri: "https://accounts.google.com/o/oauth2/auth",
+            token_uri: "https://oauth2.googleapis.com/token",
+            auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+            client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${GOOGLE_CLIENT_EMAIL.replace('@', '%40')}`,
+            universe_domain: "googleapis.com"
+          };
+          console.log('Credenciais do Google Analytics carregadas com sucesso via variáveis separadas');
+          analyticsDataClient = new BetaAnalyticsDataClient({
+            credentials
+          });
+        } catch (parseError) {
+          console.error('Erro ao criar credenciais a partir de variáveis separadas:', parseError);
         }
       }
     } catch (error) {
@@ -57,6 +86,9 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   console.log('GA4_PROPERTY_ID:', GA4_PROPERTY_ID ? 'Configurado' : 'NÃO CONFIGURADO');
   console.log('GOOGLE_APPLICATION_CREDENTIALS:', GOOGLE_APPLICATION_CREDENTIALS ? 'Configurado' : 'NÃO CONFIGURADO');
   console.log('GOOGLE_CREDENTIALS_JSON:', GOOGLE_CREDENTIALS_JSON ? 'Configurado' : 'NÃO CONFIGURADO');
+  console.log('GOOGLE_PROJECT_ID:', GOOGLE_PROJECT_ID ? 'Configurado' : 'NÃO CONFIGURADO');
+  console.log('GOOGLE_PRIVATE_KEY:', GOOGLE_PRIVATE_KEY ? 'Configurado' : 'NÃO CONFIGURADO');
+  console.log('GOOGLE_CLIENT_EMAIL:', GOOGLE_CLIENT_EMAIL ? 'Configurado' : 'NÃO CONFIGURADO');
   
   const client = getAnalyticsClient();
   

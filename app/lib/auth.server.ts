@@ -42,13 +42,14 @@ export async function getUser(request: Request): Promise<Usuario | null> {
   console.log('=== GET USER ===');
   console.log('User ID da sessão:', userId);
 
-  // Verificar se é o usuário temporário
+  // Verificar se é o usuário temporário (TEMPORÁRIO - remover depois)
   if (userId === 'temp-admin-1') {
-    console.log('Retornando usuário temporário');
+    console.log('⚠️ ATENÇÃO: Ainda usando usuário temporário!');
+    console.log('Para testar login real, faça logout em /admin/logout');
     return {
       id: 'temp-admin-1',
       email: 'admin@raiseup.com.br',
-      nome: 'Administrador RaiseUp',
+      nome: 'Administrador RaiseUp (TEMPORÁRIO)',
       ativo: true,
       ultimo_login: new Date().toISOString(),
       criado_em: new Date().toISOString(),
