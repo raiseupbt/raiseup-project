@@ -101,6 +101,11 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
   }
 
   try {
+    console.log('=== DEBUG AUTENTICAÇÃO ===');
+    console.log('Email sanitizado:', emailSanitizado);
+    console.log('Senha fornecida:', senha);
+    console.log('SUPABASE_URL configurada:', !!process.env.SUPABASE_URL);
+    console.log('SUPABASE_ANON_KEY configurada:', !!process.env.SUPABASE_ANON_KEY);
     console.log('Tentando autenticação via Supabase primeiro...');
     
     // Tentar buscar no Supabase PRIMEIRO
@@ -111,7 +116,11 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
       .eq('ativo', true)
       .single();
 
-    console.log('Resultado da busca no Supabase:', { usuario, error });
+    console.log('Resultado da busca no Supabase:', { 
+      usuario: usuario ? 'Usuário encontrado' : 'Usuário não encontrado', 
+      email: usuario?.email,
+      error: error?.message || 'Sem erro'
+    });
 
     if (usuario && !error) {
       const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);

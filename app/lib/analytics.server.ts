@@ -34,10 +34,15 @@ export interface AnalyticsData {
 }
 
 export async function getAnalyticsData(): Promise<AnalyticsData> {
+  console.log('=== DEBUG GOOGLE ANALYTICS ===');
+  console.log('GA4_PROPERTY_ID:', GA4_PROPERTY_ID ? 'Configurado' : 'NÃO CONFIGURADO');
+  console.log('GOOGLE_APPLICATION_CREDENTIALS:', GOOGLE_APPLICATION_CREDENTIALS ? 'Configurado' : 'NÃO CONFIGURADO');
+  
   const client = getAnalyticsClient();
   
   if (!client || !GA4_PROPERTY_ID) {
     console.log('Google Analytics não configurado, retornando dados simulados');
+    console.log('Motivo: client =', !!client, 'GA4_PROPERTY_ID =', !!GA4_PROPERTY_ID);
     return getSimulatedData();
   }
 
