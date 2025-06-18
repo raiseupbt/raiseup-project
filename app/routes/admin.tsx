@@ -123,7 +123,7 @@ export default function Admin() {
               alignItems: 'center',
               gap: '0.5rem'
             }}>
-              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '36px' }} />
+              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '36px', filter: 'brightness(0) invert(1)' }} />
               <span>Admin</span>
             </Link>
             <nav style={{ display: 'flex', gap: '0.5rem' }}>

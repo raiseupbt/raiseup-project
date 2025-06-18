@@ -85,7 +85,7 @@ export default function LoginAdmin() {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '32px', marginRight: '8px' }} />
+            <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '32px', marginRight: '8px', filter: 'brightness(0) invert(1)' }} />
             Admin
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>

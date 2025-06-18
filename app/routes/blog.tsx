@@ -27,7 +27,6 @@ export const loader = async () => {
       categoria: 'Automação com IA', // Categoria padrão
       tempo_leitura: artigo.tempo_leitura || '5 min',
       tags: artigo.tags || ['IA', 'Automação', 'Tecnologia'],
-      imagem: artigo.imagem_url || 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80',
       featured: artigo.destaque || false
     })) : [
       {
@@ -41,7 +40,6 @@ export const loader = async () => {
         categoria: 'Agentes Conversacionais',
         tempo_leitura: '5 min',
         tags: ['IA', 'Atendimento', 'Chatbot', 'Customer Service'],
-        imagem: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80',
         featured: true
       },
       {
@@ -55,7 +53,6 @@ export const loader = async () => {
         categoria: 'Mídias Sociais',
         tempo_leitura: '7 min',
         tags: ['Social Media', 'Automação', 'Marketing', 'Engajamento'],
-        imagem: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&q=80',
         featured: false
       },
       {
@@ -69,7 +66,6 @@ export const loader = async () => {
         categoria: 'Produtividade',
         tempo_leitura: '6 min',
         tags: ['Produtividade', 'Workflow', 'Automação', 'Processos'],
-        imagem: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
         featured: false
       },
       {
@@ -83,7 +79,6 @@ export const loader = async () => {
         categoria: 'Estratégia',
         tempo_leitura: '8 min',
         tags: ['ROI', 'Investimento', 'KPIs', 'Métricas'],
-        imagem: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
         featured: true
       },
       {
@@ -97,7 +92,6 @@ export const loader = async () => {
         categoria: 'Implementação',
         tempo_leitura: '10 min',
         tags: ['Implementação', 'Planejamento', 'Estratégia', 'Roadmap'],
-        imagem: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80',
         featured: false
       }
     ];
@@ -122,7 +116,6 @@ export const loader = async () => {
           categoria: 'IA',
           tempo_leitura: '5 min',
           tags: ['IA', 'Atendimento', 'Tecnologia'],
-          imagem: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80',
           featured: true
         }
       ]
@@ -362,16 +355,6 @@ export default function Blog() {
             background: rgba(30, 41, 59, 0.9);
           }
 
-          .blog-article-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            transition: all 0.4s ease;
-          }
-
-          .blog-article-card:hover .blog-article-image {
-            transform: scale(1.05);
-          }
 
           .blog-article-content {
             padding: 2rem;
@@ -590,7 +573,7 @@ export default function Blog() {
         <header className="blog-header">
           <nav className="blog-nav">
             <Link to="/" className="blog-logo">
-              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '32px' }} />
+              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '40px', filter: 'brightness(0) invert(1)' }} />
             </Link>
             <div className="blog-nav-links">
               <Link to="/" className="blog-back-link">
@@ -636,11 +619,6 @@ export default function Blog() {
               <div className="blog-featured-grid">
                 {artigosFeatured.map((artigo: any) => (
                   <article key={artigo.id} className="blog-article-card featured">
-                    <img 
-                      src={artigo.imagem} 
-                      alt={artigo.titulo}
-                      className="blog-article-image"
-                    />
                     <div className="blog-article-content">
                       <div className="blog-article-meta">
                         <span className="blog-article-category">{artigo.categoria}</span>
@@ -690,11 +668,6 @@ export default function Blog() {
             <div className="blog-articles-grid">
               {artigosRegulares.map((artigo: any) => (
                 <article key={artigo.id} className="blog-article-card">
-                  <img 
-                    src={artigo.imagem} 
-                    alt={artigo.titulo}
-                    className="blog-article-image"
-                  />
                   <div className="blog-article-content">
                     <div className="blog-article-meta">
                       <span className="blog-article-category">{artigo.categoria}</span>

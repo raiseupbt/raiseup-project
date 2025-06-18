@@ -408,7 +408,7 @@ export default function Contato() {
         <header className="contact-header">
           <nav className="contact-nav">
             <Link to="/" className="contact-logo">
-              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '32px' }} />
+              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '40px', filter: 'brightness(0) invert(1)' }} />
             </Link>
             <Link to="/" className="contact-back">
               ← Voltar ao Site
