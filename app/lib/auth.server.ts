@@ -62,23 +62,31 @@ export async function requireUser(request: Request): Promise<Usuario> {
 
 // Autenticação
 export async function login(email: string, senha: string): Promise<Usuario | null> {
+  console.log('=== FUNÇÃO LOGIN ===');
+  console.log('Email recebido:', email);
+  console.log('Senha recebida:', senha);
+  
   // Validação de entrada
   if (!email || !senha) {
+    console.log('Email ou senha vazios');
     return null;
   }
   
   // Sanitização do email
   const emailSanitizado = email.toLowerCase().trim();
+  console.log('Email sanitizado:', emailSanitizado);
   
   // Validação básica do formato do email
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailSanitizado)) {
+    console.log('Formato de email inválido');
     return null;
   }
 
-  // Credenciais temporárias para demonstração
+  // Credenciais temporárias para demonstração - SEMPRE VERIFICAR PRIMEIRO
   if (emailSanitizado === 'admin@raiseup.com.br' && senha === 'admin123') {
+    console.log('Login bem-sucedido com credenciais temporárias');
     return {
-      id: '1',
+      id: 'temp-admin-1',
       email: 'admin@raiseup.com.br',
       nome: 'Administrador RaiseUp',
       ativo: true,
@@ -87,6 +95,8 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
       atualizado_em: new Date().toISOString()
     };
   }
+
+  console.log('Credenciais temporárias não conferiram, tentando Supabase...');
 
   try {
     // Tentar buscar no Supabase
@@ -97,13 +107,18 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
       .eq('ativo', true)
       .single();
 
+    console.log('Resultado da busca no Supabase:', { usuario, error });
+
     if (error || !usuario) {
+      console.log('Usuário não encontrado no Supabase');
       return null;
     }
 
     const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
+    console.log('Senha válida:', senhaValida);
     
     if (!senhaValida) {
+      console.log('Senha inválida');
       return null;
     }
 
@@ -113,9 +128,9 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
       .update({ ultimo_login: new Date().toISOString() })
       .eq('id', usuario.id);
 
+    console.log('Login bem-sucedido via Supabase');
     return usuario;
   } catch (error) {
-    // Fallback para credenciais temporárias se Supabase falhar
     console.error('Erro na autenticação via Supabase:', error);
     return null;
   }

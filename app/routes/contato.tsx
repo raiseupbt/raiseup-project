@@ -1,24 +1,7 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useActionData, Link } from "@remix-run/react";
-import { createClient } from "@supabase/supabase-js";
-
-// Configuração do Supabase
-let supabase: any;
-try {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-  
-  if (supabaseUrl && supabaseAnonKey) {
-    supabase = createClient(supabaseUrl, supabaseAnonKey);
-  } else {
-    console.warn('Variáveis do Supabase não configuradas');
-    supabase = null;
-  }
-} catch (error) {
-  console.error('Erro ao configurar Supabase:', error);
-  supabase = null;
-}
+import { supabase } from "~/lib/supabase.server";
 
 // Validação dos dados
 function validarFormulario(data: any) {
@@ -72,42 +55,40 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // Tentar salvar no Supabase
   try {
-    if (supabase) {
-      const { data: resultado, error } = await supabase
-        .from('contatos')
-        .insert({
-          nome: dados.nome,
-          email: dados.email,
-          telefone: dados.telefone,
-          empresa: dados.empresa,
-          area_interesse: dados.area_interesse,
-          mensagem: dados.mensagem,
-          ip_address: request.headers.get('x-forwarded-for') || 'desconhecido',
-          user_agent: request.headers.get('user-agent') || 'desconhecido',
-          status: 'novo',
-          criado_em: new Date().toISOString()
-        });
+    console.log('=== SALVANDO CONTATO ===');
+    console.log('Dados:', dados);
+    
+    const { data: resultado, error } = await supabase
+      .from('contatos')
+      .insert({
+        nome: dados.nome,
+        email: dados.email,
+        telefone: dados.telefone,
+        empresa: dados.empresa,
+        area_interesse: dados.area_interesse,
+        mensagem: dados.mensagem,
+        endereco_ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'desconhecido',
+        navegador: request.headers.get('user-agent') || 'desconhecido',
+        status: 'novo',
+        origem: 'website'
+      })
+      .select();
 
-      if (error) {
-        console.error('Erro ao salvar no Supabase:', error);
-        return json({
-          success: false,
-          errors: ['Erro interno. Tente novamente mais tarde.']
-        }, { status: 500 });
-      }
+    console.log('Resultado do Supabase:', { resultado, error });
 
+    if (error) {
+      console.error('Erro ao salvar no Supabase:', error);
       return json({
-        success: true,
-        message: 'Sua mensagem foi enviada com sucesso! Entraremos em contato em breve.'
-      });
-    } else {
-      // Supabase não configurado - simular sucesso
-      console.log('Dados do contato (Supabase não configurado):', dados);
-      return json({
-        success: true,
-        message: 'Formulário recebido! (Banco de dados não configurado)'
-      });
+        success: false,
+        errors: ['Erro interno. Tente novamente mais tarde.']
+      }, { status: 500 });
     }
+
+    console.log('Contato salvo com sucesso!');
+    return json({
+      success: true,
+      message: 'Sua mensagem foi enviada com sucesso! Entraremos em contato em breve.'
+    });
   } catch (error) {
     console.error('Erro ao processar formulário:', error);
     return json({

@@ -8,8 +8,8 @@ export const loader = async () => {
     const { data: artigos, error } = await supabase
       .from('artigos')
       .select('*')
-      .eq('status', 'publicado')
-      .order('publicado_em', { ascending: false });
+      .eq('ativo', true)
+      .order('data_publicacao', { ascending: false });
 
     if (error) {
       console.error('Erro ao buscar artigos:', error);
@@ -22,13 +22,13 @@ export const loader = async () => {
       slug: artigo.slug,
       resumo: artigo.resumo,
       conteudo_preview: artigo.conteudo.substring(0, 150) + '...',
-      data_publicacao: artigo.publicado_em || artigo.criado_em,
+      data_publicacao: artigo.data_publicacao || artigo.criado_em,
       autor: artigo.autor,
       categoria: 'Automação com IA', // Categoria padrão
-      tempo_leitura: '5 min', // Calcular dinamicamente no futuro
-      tags: ['IA', 'Automação', 'Tecnologia'], // Tags padrão
+      tempo_leitura: artigo.tempo_leitura || '5 min',
+      tags: artigo.tags || ['IA', 'Automação', 'Tecnologia'],
       imagem: artigo.imagem_url || 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80',
-      featured: artigo.featured || false
+      featured: artigo.destaque || false
     })) : [
       {
         id: '1',
