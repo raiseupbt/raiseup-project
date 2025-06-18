@@ -23,8 +23,9 @@ function validarFormulario(data: any) {
     erros.push('Selecione uma área de interesse');
   }
   
-  if (!data.mensagem || data.mensagem.trim().length < 10) {
-    erros.push('Mensagem deve ter pelo menos 10 caracteres');
+  // Mensagem não é mais obrigatória
+  if (data.mensagem && data.mensagem.trim().length > 0 && data.mensagem.trim().length < 10) {
+    erros.push('Mensagem deve ter pelo menos 10 caracteres se fornecida');
   }
   
   return erros;
@@ -66,7 +67,7 @@ export async function action({ request }: ActionFunctionArgs) {
         telefone: dados.telefone,
         empresa: dados.empresa,
         area_interesse: dados.area_interesse,
-        mensagem: dados.mensagem,
+        mensagem: dados.mensagem || 'Nenhuma mensagem adicional',
         endereco_ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'desconhecido',
         navegador: request.headers.get('user-agent') || 'desconhecido',
         status: 'novo',
@@ -407,7 +408,7 @@ export default function Contato() {
         <header className="contact-header">
           <nav className="contact-nav">
             <Link to="/" className="contact-logo">
-              RaiseUp
+              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '32px' }} />
             </Link>
             <Link to="/" className="contact-back">
               ← Voltar ao Site
@@ -533,14 +534,13 @@ export default function Contato() {
 
               <div className="form-group">
                 <label htmlFor="mensagem" className="form-label">
-                  Mensagem *
+                  Mensagem
                 </label>
                 <textarea 
                   id="mensagem" 
                   name="mensagem" 
                   className="form-textarea"
-                  placeholder="Conte-nos sobre seu projeto e como podemos ajudar..."
-                  required
+                  placeholder="Conte-nos sobre seu projeto e como podemos ajudar... (opcional)"
                 />
               </div>
 
@@ -554,8 +554,8 @@ export default function Contato() {
           <div className="contact-info">
             <h3>Outras Formas de Contato</h3>
             <p>📧 contato@raiseup.com.br</p>
-            <p>📱 +55 (11) 99999-9999</p>
-            <a href="https://wa.me/5511999999999" className="whatsapp-link" target="_blank" rel="noopener noreferrer">
+            <p>📱 +55 (19) 98147-6177</p>
+            <a href="https://wa.me/5519981476177" className="whatsapp-link" target="_blank" rel="noopener noreferrer">
               💬 Falar no WhatsApp
             </a>
           </div>

@@ -85,7 +85,8 @@ export default function LoginAdmin() {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            RaiseUp Admin
+            <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '32px', marginRight: '8px' }} />
+            Admin
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
             Área administrativa

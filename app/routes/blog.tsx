@@ -590,7 +590,7 @@ export default function Blog() {
         <header className="blog-header">
           <nav className="blog-nav">
             <Link to="/" className="blog-logo">
-              RaiseUp
+              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '32px' }} />
             </Link>
             <div className="blog-nav-links">
               <Link to="/" className="blog-back-link">

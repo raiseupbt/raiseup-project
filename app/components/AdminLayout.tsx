@@ -137,7 +137,8 @@ export default function AdminLayout({
             alignItems: 'center',
             gap: '0.5rem'
           }}>
-            🚀 RaiseUp Admin
+            <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '32px' }} />
+            <span>Admin</span>
           </Link>
           
           <div className="admin-user-section" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

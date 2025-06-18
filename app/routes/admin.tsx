@@ -42,25 +42,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         totalArtigos,
         contatosHoje,
         contatosOntem,
-        acessos30Dias: 12500, // Placeholder - integrar com Analytics
-        crescimentoAcessos: 18,
         crescimentoContatos: contatosHoje > contatosOntem ? Math.round(((contatosHoje - contatosOntem) / Math.max(contatosOntem, 1)) * 100) : 0,
-        crescimentoArtigos: 12,
-        tempoMedioSessao: '2m 45s',
-        taxaConversao: 3.2,
-        usuariosAtivos: 89,
-        paginasPopulares: 324
       },
       contatosRecentes: contatos?.slice(0, 4) || [],
-      artigosPopulares: artigos?.slice(0, 4) || [],
-      metricas: {
-        vendasMes: 15,
-        metaVendas: 20,
-        leadsMes: totalContatos,
-        metaLeads: 100,
-        satisfacaoCliente: 4.8,
-        ticketMedio: 2500
-      }
+      artigosPopulares: artigos?.slice(0, 4) || []
     });
   } catch (error) {
     console.error('Erro ao carregar dados do admin:', error);
@@ -69,44 +54,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     return json({
       estatisticas: {
         totalContatos: 0,
-      totalArtigos: 8,
-      contatosHoje: 3,
-      contatosOntem: 5,
-      acessos30Dias: 12500,
-      crescimentoAcessos: 18,
-      crescimentoContatos: 25,
-      crescimentoArtigos: 12,
-      tempoMedioSessao: '2m 45s',
-      taxaConversao: 3.2,
-      usuariosAtivos: 89,
-      paginasPopulares: 324
-    },
-    contatosRecentes: [
-      { id: '1', nome: 'João Silva', email: 'joao@empresa.com', empresa: 'Tech Solutions', area_interesse: 'Agentes Conversacionais', criado_em: new Date().toISOString(), status: 'novo' },
-      { id: '2', nome: 'Maria Santos', email: 'maria@startup.com', empresa: 'StartupX', area_interesse: 'Agentes de Mídias Sociais', criado_em: new Date(Date.now() - 3600000).toISOString(), status: 'respondido' },
-      { id: '3', nome: 'Pedro Costa', email: 'pedro@consulting.com', empresa: 'Consulting Pro', area_interesse: 'Agentes de Produtividade', criado_em: new Date(Date.now() - 7200000).toISOString(), status: 'novo' },
-      { id: '4', nome: 'Ana Rodriguez', email: 'ana@digital.com', empresa: 'Digital Agency', area_interesse: 'Consultoria em IA', criado_em: new Date(Date.now() - 10800000).toISOString(), status: 'em_andamento' }
-    ],
-    artigosPopulares: [
-      { id: '1', titulo: 'Como a IA está transformando negócios', slug: 'ia-transformando-negocios', visualizacoes: 1250, crescimento: 23, ativo: true, autor: 'RaiseUp Team' },
-      { id: '2', titulo: 'Automação humanizada: o futuro do atendimento', slug: 'automacao-humanizada', visualizacoes: 890, crescimento: 15, ativo: true, autor: 'RaiseUp Team' },
-      { id: '3', titulo: 'Agentes de produtividade na prática', slug: 'agentes-produtividade', visualizacoes: 760, crescimento: 8, ativo: true, autor: 'RaiseUp Team' },
-      { id: '4', titulo: 'WhatsApp Business com IA: Guia completo', slug: 'whatsapp-business-ia', visualizacoes: 650, crescimento: 31, ativo: true, autor: 'RaiseUp Team' }
-    ],
-    metricas: {
-      vendasMes: 15,
-      metaVendas: 20,
-      leadsMes: 78,
-      metaLeads: 100,
-      satisfacaoCliente: 4.8,
-      ticketMedio: 2500
-    }
-  });
+        totalArtigos: 0,
+        contatosHoje: 0,
+        contatosOntem: 0,
+        crescimentoContatos: 0,
+      },
+      contatosRecentes: [],
+      artigosPopulares: []
+    });
   }
 };
 
 export default function Admin() {
-  const { estatisticas, contatosRecentes, artigosPopulares, metricas } = useLoaderData<typeof loader>();
+  const { estatisticas, contatosRecentes, artigosPopulares } = useLoaderData<typeof loader>();
 
   // Função para formatar data
   const formatDate = (dateString: string) => {
@@ -163,7 +123,8 @@ export default function Admin() {
               alignItems: 'center',
               gap: '0.5rem'
             }}>
-              🚀 RaiseUp Admin
+              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '36px' }} />
+              <span>Admin</span>
             </Link>
             <nav style={{ display: 'flex', gap: '0.5rem' }}>
               <span style={{
@@ -411,131 +372,9 @@ export default function Admin() {
                 📝
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{
-                color: '#22c55e',
-                fontSize: '0.85rem',
-                fontWeight: '600'
-              }}>
-                +{estatisticas.crescimentoArtigos}%
-              </span>
-              <span style={{ color: '#64748b', fontSize: '0.85rem' }}>crescimento</span>
-            </div>
-          </div>
-
-          {/* Traffic Card */}
-          <div style={{
-            background: 'rgba(26, 32, 44, 0.8)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
-            padding: '2rem',
-            borderRadius: '20px',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: '100px',
-              height: '100px',
-              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%)',
-              borderRadius: '0 20px 0 100px'
-            }}></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div>
-                <h3 style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: '600' }}>
-                  TRÁFEGO (30 DIAS)
-                </h3>
-                <p style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f59e0b', margin: 0 }}>
-                  {(estatisticas.acessos30Dias / 1000).toFixed(1)}K
-                </p>
-              </div>
-              <div style={{
-                background: 'rgba(245, 158, 11, 0.15)',
-                padding: '0.75rem',
-                borderRadius: '12px',
-                fontSize: '1.5rem'
-              }}>
-                📈
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{
-                color: '#22c55e',
-                fontSize: '0.85rem',
-                fontWeight: '600'
-              }}>
-                +{estatisticas.crescimentoAcessos}%
-              </span>
-              <span style={{ color: '#64748b', fontSize: '0.85rem' }}>vs período anterior</span>
-            </div>
           </div>
         </div>
 
-        {/* Additional Metrics Row */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem',
-          marginBottom: '3rem'
-        }}>
-          <div style={{
-            background: 'rgba(26, 32, 44, 0.6)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            border: '1px solid rgba(71, 85, 105, 0.3)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏱️</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e2e8f0', marginBottom: '0.25rem' }}>
-              {estatisticas.tempoMedioSessao}
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Tempo Médio</div>
-          </div>
-
-          <div style={{
-            background: 'rgba(26, 32, 44, 0.6)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            border: '1px solid rgba(71, 85, 105, 0.3)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📊</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e2e8f0', marginBottom: '0.25rem' }}>
-              {estatisticas.taxaConversao}%
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Taxa Conversão</div>
-          </div>
-
-          <div style={{
-            background: 'rgba(26, 32, 44, 0.6)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            border: '1px solid rgba(71, 85, 105, 0.3)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👥</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e2e8f0', marginBottom: '0.25rem' }}>
-              {estatisticas.usuariosAtivos}
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Usuários Ativos</div>
-          </div>
-
-          <div style={{
-            background: 'rgba(26, 32, 44, 0.6)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            border: '1px solid rgba(71, 85, 105, 0.3)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>💰</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e2e8f0', marginBottom: '0.25rem' }}>
-              R${metricas.ticketMedio}
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Ticket Médio</div>
-          </div>
-        </div>
 
         {/* Enhanced Content Grid */}
         <div style={{
@@ -737,20 +576,10 @@ export default function Admin() {
                   </div>
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                      <div style={{ color: '#94a3b8' }}>
-                        <span style={{ color: '#64748b' }}>👁️</span> {artigo.visualizacoes.toLocaleString()} views
-                      </div>
-                      <div style={{ color: '#94a3b8' }}>
-                        <span style={{
-                          color: artigo.crescimento > 0 ? '#22c55e' : '#64748b',
-                          fontWeight: '600'
-                        }}>
-                          {artigo.crescimento > 0 ? '↗' : '→'} +{artigo.crescimento}%
-                        </span>
-                      </div>
+                    <div style={{ color: '#94a3b8' }}>
+                      Publicado em: {new Date(artigo.data_publicacao || artigo.criado_em).toLocaleDateString('pt-BR')}
                     </div>
-                    <Link to={`/admin/artigos/${artigo.id}`} style={{
+                    <Link to={`/blog/${artigo.slug}`} style={{
                       color: '#8b5cf6',
                       textDecoration: 'none',
                       fontSize: '0.8rem',
@@ -758,7 +587,7 @@ export default function Admin() {
                       borderRadius: '4px',
                       border: '1px solid rgba(139, 92, 246, 0.3)'
                     }}>
-                      Editar
+                      Ver Post
                     </Link>
                   </div>
                 </div>
@@ -767,82 +596,6 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Sales & Performance Metrics */}
-        <div style={{
-          marginTop: '3rem',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '2rem',
-          marginBottom: '3rem'
-        }}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%)',
-            padding: '2rem',
-            borderRadius: '20px',
-            border: '1px solid rgba(34, 197, 94, 0.3)'
-          }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', color: '#22c55e' }}>
-              📊 Métricas de Vendas
-            </h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <span style={{ color: '#94a3b8' }}>Vendas este mês</span>
-              <span style={{ fontSize: '1.5rem', fontWeight: '700', color: '#22c55e' }}>
-                {metricas.vendasMes}/{metricas.metaVendas}
-              </span>
-            </div>
-            <div style={{
-              width: '100%',
-              height: '8px',
-              background: 'rgba(34, 197, 94, 0.2)',
-              borderRadius: '4px',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                width: `${(metricas.vendasMes / metricas.metaVendas) * 100}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #22c55e 0%, #16a34a 100%)',
-                borderRadius: '4px'
-              }}></div>
-            </div>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem', margin: 0 }}>
-              {Math.round((metricas.vendasMes / metricas.metaVendas) * 100)}% da meta mensal
-            </p>
-          </div>
-
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%)',
-            padding: '2rem',
-            borderRadius: '20px',
-            border: '1px solid rgba(59, 130, 246, 0.3)'
-          }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', color: '#3b82f6' }}>
-              🎯 Geração de Leads
-            </h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <span style={{ color: '#94a3b8' }}>Leads este mês</span>
-              <span style={{ fontSize: '1.5rem', fontWeight: '700', color: '#3b82f6' }}>
-                {metricas.leadsMes}/{metricas.metaLeads}
-              </span>
-            </div>
-            <div style={{
-              width: '100%',
-              height: '8px',
-              background: 'rgba(59, 130, 246, 0.2)',
-              borderRadius: '4px',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                width: `${(metricas.leadsMes / metricas.metaLeads) * 100}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
-                borderRadius: '4px'
-              }}></div>
-            </div>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem', margin: 0 }}>
-              {Math.round((metricas.leadsMes / metricas.metaLeads) * 100)}% da meta mensal
-            </p>
-          </div>
-        </div>
 
         {/* Enhanced Quick Actions */}
         <div style={{
@@ -971,9 +724,6 @@ export default function Admin() {
         }}>
           <p style={{ margin: 0, fontSize: '0.9rem' }}>
             © 2025 RaiseUp - Automação com IA Humanizada | Dashboard Administrativo v1.0
-          </p>
-          <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem', opacity: 0.7 }}>
-            Satisfação do cliente: ⭐ {metricas.satisfacaoCliente}/5.0
           </p>
         </div>
       </main>
