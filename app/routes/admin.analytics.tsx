@@ -485,27 +485,13 @@ export default function AdminAnalytics() {
           </div>
         </div>
 
-        {/* Novas Seções Avançadas */}
-        <div style={{
-          background: 'rgba(139, 92, 246, 0.1)',
-          border: '1px solid rgba(139, 92, 246, 0.3)',
-          borderRadius: '8px',
-          padding: '0.75rem 1rem',
-          marginBottom: '1rem',
-          color: '#8b5cf6',
-          fontSize: '0.9rem',
-          textAlign: 'center'
+        {/* Seções Avançadas */}
+        <div className={`analytics-content-grid ${isLoading ? 'loading-overlay' : ''}`} style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+          gap: '2rem',
+          marginTop: '2rem'
         }}>
-          🚀 <strong>Analytics Avançado v2.0</strong> - Dados em tempo real, horários de pico e muito mais!
-        </div>
-        {/* Seções Avançadas Sempre Disponíveis */}
-        {(
-          <div className={`analytics-content-grid ${isLoading ? 'loading-overlay' : ''}`} style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
-            gap: '2rem',
-            marginTop: '2rem'
-          }}>
             {/* Horários de Pico */}
             {(
               <div className="analytics-content-card" style={{
@@ -755,7 +741,6 @@ export default function AdminAnalytics() {
               ))}
             </div>
           </div>
-        )}
 
         {/* Integração com Google Analytics */}
         <div style={{

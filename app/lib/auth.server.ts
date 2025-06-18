@@ -39,19 +39,12 @@ export async function getUser(request: Request): Promise<Usuario | null> {
   const userId = await getUserId(request);
   if (!userId) return null;
 
-  console.log('=== GET USER ===');
-  console.log('User ID da sessão:', userId);
-
-
-  console.log('Buscando usuário no Supabase...');
   const { data, error } = await supabase
     .from('usuarios')
     .select('*')
     .eq('id', userId)
     .eq('ativo', true)
     .single();
-
-  console.log('Resultado da busca:', { data, error });
 
   if (error || !data) return null;
   return data;
@@ -67,35 +60,21 @@ export async function requireUser(request: Request): Promise<Usuario> {
 
 // Autenticação
 export async function login(email: string, senha: string): Promise<Usuario | null> {
-  console.log('=== FUNÇÃO LOGIN ===');
-  console.log('Email recebido:', email);
-  console.log('Senha recebida:', senha);
-  
   // Validação de entrada
   if (!email || !senha) {
-    console.log('Email ou senha vazios');
     return null;
   }
   
   // Sanitização do email
   const emailSanitizado = email.toLowerCase().trim();
-  console.log('Email sanitizado:', emailSanitizado);
   
   // Validação básica do formato do email
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailSanitizado)) {
-    console.log('Formato de email inválido');
     return null;
   }
 
   try {
-    console.log('=== DEBUG AUTENTICAÇÃO ===');
-    console.log('Email sanitizado:', emailSanitizado);
-    console.log('Senha fornecida:', senha);
-    console.log('SUPABASE_URL configurada:', !!process.env.SUPABASE_URL);
-    console.log('SUPABASE_ANON_KEY configurada:', !!process.env.SUPABASE_ANON_KEY);
-    console.log('Tentando autenticação via Supabase primeiro...');
-    
-    // Tentar buscar no Supabase PRIMEIRO
+    // Tentar buscar no Supabase
     const { data: usuario, error } = await supabase
       .from('usuarios')
       .select('id, email, senha_hash, nome, ativo, ultimo_login, criado_em, atualizado_em')
@@ -103,18 +82,8 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
       .eq('ativo', true)
       .single();
 
-    console.log('Resultado da busca no Supabase:', { 
-      usuario: usuario ? 'Usuário encontrado' : 'Usuário não encontrado', 
-      email: usuario?.email,
-      hasHash: usuario?.senha_hash ? 'Sim' : 'Não',
-      error: error?.message || 'Sem erro',
-      errorCode: error?.code || 'N/A',
-      errorDetails: error?.details || 'N/A'
-    });
-
     if (usuario && !error) {
       const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
-      console.log('Senha válida:', senhaValida);
       
       if (senhaValida) {
         // Atualizar último login
@@ -123,17 +92,15 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
           .update({ ultimo_login: new Date().toISOString() })
           .eq('id', usuario.id);
 
-        console.log('Login bem-sucedido via Supabase');
         return usuario;
       }
     }
     
-    console.log('Não foi possível autenticar via Supabase.');
-    
-    console.log('Credenciais inválidas');
     return null;
   } catch (error) {
-    console.error('Erro na autenticação:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Auth: Erro na autenticação:', error.message);
+    }
     return null;
   }
 }
