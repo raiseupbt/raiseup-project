@@ -14,37 +14,20 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  console.log('=== ACTION INICIADA ===');
-  
   const formData = await request.formData();
-  
-  // Debug: ver todos os campos do formulário
-  console.log('=== FORM DEBUG ===');
-  for (const [key, value] of formData.entries()) {
-    console.log(`${key}: ${value}`);
-  }
-  
   const email = formData.get('email')?.toString();
   const senha = formData.get('senha')?.toString();
 
-  console.log('Email extraído:', email);
-  console.log('Senha extraída:', senha);
-
   if (!email || !senha) {
-    console.log('Email ou senha não fornecidos');
     return json({ erro: 'Email e senha são obrigatórios' }, { status: 400 });
   }
 
-  console.log('Chamando função login...');
   const user = await login(email, senha);
-  console.log('Retorno da função login:', user);
   
   if (!user) {
-    console.log('Login falhou - usuário não encontrado ou senha inválida');
     return json({ erro: 'Email ou senha inválidos' }, { status: 401 });
   }
 
-  console.log('Login bem-sucedido para:', user.email);
   return createUserSession(user.id, '/admin');
 };
 

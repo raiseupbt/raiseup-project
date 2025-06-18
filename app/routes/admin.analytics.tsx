@@ -9,9 +9,12 @@ import AdminLayout from "~/components/AdminLayout";
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await requireUser(request);
   
+  const url = new URL(request.url);
+  const period = url.searchParams.get('period') || '30daysAgo';
+  
   try {
-    const analyticsData = await getAnalyticsData();
-    return json({ user, analyticsData });
+    const analyticsData = await getAnalyticsData(period);
+    return json({ user, analyticsData, currentPeriod: period });
   } catch (error) {
     console.error('Erro ao carregar analytics:', error);
     // Fallback para dados simulados em caso de erro
@@ -24,14 +27,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       topPages: [],
       trafficSources: [],
       devices: [],
-      locations: []
+      locations: [],
+      cities: []
     };
-    return json({ user, analyticsData });
+    return json({ user, analyticsData, currentPeriod: period });
   }
 };
 
 export default function AdminAnalytics() {
-  const { user, analyticsData } = useLoaderData<typeof loader>();
+  const { user, analyticsData, currentPeriod } = useLoaderData<typeof loader>();
+  
+  const periodLabels: Record<string, string> = {
+    'today': 'Hoje',
+    '7daysAgo': 'Últimos 7 dias', 
+    '30daysAgo': 'Últimos 30 dias',
+    '90daysAgo': 'Últimos 90 dias'
+  };
 
   return (
     <>
@@ -122,16 +133,27 @@ export default function AdminAnalytics() {
         currentPage="analytics"
         pageTitle="Analytics"
         pageActions={
-          <div style={{
-            padding: '0.75rem 1rem',
-            background: 'rgba(45, 55, 72, 0.8)',
-            borderRadius: '8px',
-            fontSize: '0.9rem',
-            color: '#94a3b8',
-            border: '1px solid rgba(51, 65, 85, 0.3)'
-          }}>
-            📅 Últimos 30 dias
-          </div>
+          <select
+            value={currentPeriod}
+            onChange={(e) => {
+              window.location.href = `/admin/analytics?period=${e.target.value}`;
+            }}
+            style={{
+              padding: '0.75rem 1rem',
+              background: 'rgba(45, 55, 72, 0.8)',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              color: '#f8fafc',
+              border: '1px solid rgba(51, 65, 85, 0.3)',
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value="today">📅 Hoje</option>
+            <option value="7daysAgo">📅 Últimos 7 dias</option>
+            <option value="30daysAgo">📅 Últimos 30 dias</option>
+            <option value="90daysAgo">📅 Últimos 90 dias</option>
+          </select>
         }
       >
         {/* Cards de Estatísticas */}
@@ -176,6 +198,15 @@ export default function AdminAnalytics() {
             color="#ef4444"
             icon="⏱️"
           />
+          {analyticsData.realtimeUsers !== undefined && (
+            <StatCard
+              title="Online Agora"
+              value={analyticsData.realtimeUsers.toString()}
+              subtitle="Usuários ativos"
+              color="#10b981"
+              icon="🟢"
+            />
+          )}
         </div>
 
         <div className="analytics-content-grid" style={{
@@ -339,6 +370,126 @@ export default function AdminAnalytics() {
             ))}
           </div>
         </div>
+
+        {/* Novas Seções Avançadas */}
+        {(analyticsData.hourlyData || analyticsData.searchTerms || analyticsData.newVsReturning) && (
+          <div className="analytics-content-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+            gap: '2rem',
+            marginTop: '2rem'
+          }}>
+            {/* Horários de Pico */}
+            {analyticsData.hourlyData && (
+              <div className="analytics-content-card" style={{
+                background: 'rgba(26, 32, 44, 0.8)',
+                backdropFilter: 'blur(20px)',
+                padding: '1.5rem',
+                borderRadius: '16px',
+                border: '1px solid rgba(51, 65, 85, 0.3)',
+                boxShadow: '0 8px 25px -5px rgba(0, 0, 0, 0.3)'
+              }}>
+                <h2 className="analytics-card-title" style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  margin: '0 0 1.5rem 0',
+                  color: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  ⏰ Horários de Pico
+                </h2>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', 
+                  gap: '0.5rem',
+                  fontSize: '0.75rem',
+                  color: '#94a3b8'
+                }}>
+                  {analyticsData.hourlyData.map((hour, index) => (
+                    <div key={hour.hour} style={{
+                      textAlign: 'center',
+                      padding: '0.5rem 0.25rem',
+                      background: `rgba(14, 165, 233, ${Math.min(hour.sessions / 1000, 0.8)})`,
+                      borderRadius: '4px',
+                      border: '1px solid rgba(14, 165, 233, 0.3)'
+                    }}>
+                      <div style={{ fontWeight: '600', color: '#f8fafc' }}>{hour.hour}</div>
+                      <div style={{ color: '#94a3b8', fontSize: '0.7rem' }}>{hour.sessions}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Termos de Busca */}
+            {analyticsData.searchTerms && analyticsData.searchTerms.length > 0 && (
+              <div className="analytics-content-card" style={{
+                background: 'rgba(26, 32, 44, 0.8)',
+                backdropFilter: 'blur(20px)',
+                padding: '1.5rem',
+                borderRadius: '16px',
+                border: '1px solid rgba(51, 65, 85, 0.3)',
+                boxShadow: '0 8px 25px -5px rgba(0, 0, 0, 0.3)'
+              }}>
+                <h2 className="analytics-card-title" style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  margin: '0 0 1.5rem 0',
+                  color: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  🔍 Termos de Busca
+                </h2>
+                {analyticsData.searchTerms.map((term, index) => (
+                  <ProgressBar
+                    key={term.term}
+                    label={term.term}
+                    value={term.sessions}
+                    percentage={parseFloat(((term.sessions / analyticsData.totalSessions) * 100).toFixed(1))}
+                    color={index === 0 ? '#0ea5e9' : index === 1 ? '#8b5cf6' : '#10b981'}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Usuários Novos vs Recorrentes */}
+            {analyticsData.newVsReturning && (
+              <div className="analytics-content-card" style={{
+                background: 'rgba(26, 32, 44, 0.8)',
+                backdropFilter: 'blur(20px)',
+                padding: '1.5rem',
+                borderRadius: '16px',
+                border: '1px solid rgba(51, 65, 85, 0.3)',
+                boxShadow: '0 8px 25px -5px rgba(0, 0, 0, 0.3)'
+              }}>
+                <h2 className="analytics-card-title" style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  margin: '0 0 1.5rem 0',
+                  color: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  👥 Novos vs Recorrentes
+                </h2>
+                {analyticsData.newVsReturning.map((segment, index) => (
+                  <ProgressBar
+                    key={segment.type}
+                    label={segment.type}
+                    value={segment.users}
+                    percentage={segment.percentage}
+                    color={segment.type === 'Novos' ? '#10b981' : '#8b5cf6'}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Integração com Google Analytics */}
         <div style={{
