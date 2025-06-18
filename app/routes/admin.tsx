@@ -616,6 +616,7 @@ export default function Admin() {
           <p style={{ margin: 0, fontSize: '0.9rem' }}>
             © 2025 RaiseUp - Automação com IA Humanizada | Dashboard Administrativo v1.0
           </p>
+        </div>
       </div>
     </AdminLayout>
   );
