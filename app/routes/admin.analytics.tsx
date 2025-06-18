@@ -180,7 +180,7 @@ export default function AdminAnalytics() {
 
         <div className="analytics-content-grid" style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
           gap: '2rem'
         }}>
           {/* Páginas Mais Visitadas */}
@@ -294,7 +294,7 @@ export default function AdminAnalytics() {
               alignItems: 'center',
               gap: '0.5rem'
             }}>
-              🌍 Localizações
+              🌍 Países
             </h2>
             {analyticsData.locations.map((location, index) => (
               <ProgressBar
@@ -303,6 +303,38 @@ export default function AdminAnalytics() {
                 value={location.sessions}
                 percentage={location.percentage}
                 color={index === 0 ? '#0ea5e9' : index === 1 ? '#8b5cf6' : '#10b981'}
+              />
+            ))}
+          </div>
+
+          {/* Cidades */}
+          <div className="analytics-content-card" style={{
+            background: 'rgba(26, 32, 44, 0.8)',
+            backdropFilter: 'blur(20px)',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            border: '1px solid rgba(51, 65, 85, 0.3)',
+            boxShadow: '0 8px 25px -5px rgba(0, 0, 0, 0.3)'
+          }}>
+            <h2 className="analytics-card-title" style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              margin: '0 0 1.5rem 0',
+              color: '#f8fafc',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              🏙️ Principais Cidades
+            </h2>
+            {analyticsData.cities.map((city, index) => (
+              <ProgressBarWithSubtitle
+                key={`${city.city}-${city.country}`}
+                label={city.city}
+                subtitle={city.country}
+                value={city.sessions}
+                percentage={city.percentage}
+                color={index === 0 ? '#0ea5e9' : index === 1 ? '#8b5cf6' : index === 2 ? '#10b981' : '#f59e0b'}
               />
             ))}
           </div>
@@ -441,6 +473,47 @@ function ProgressBar({ label, value, percentage, color }: any) {
         marginBottom: '0.5rem'
       }}>
         <span className="analytics-progress-label" style={{ color: '#e2e8f0', fontSize: '0.9rem' }}>{label}</span>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
+            {value.toLocaleString()}
+          </span>
+          <span style={{ color: color, fontSize: '0.8rem', fontWeight: '600' }}>
+            {percentage}%
+          </span>
+        </div>
+      </div>
+      <div style={{
+        width: '100%',
+        height: '8px',
+        background: 'rgba(45, 55, 72, 0.5)',
+        borderRadius: '4px',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          width: `${percentage}%`,
+          height: '100%',
+          background: `linear-gradient(90deg, ${color} 0%, ${color}80 100%)`,
+          borderRadius: '4px',
+          transition: 'width 0.3s ease'
+        }} />
+      </div>
+    </div>
+  );
+}
+
+function ProgressBarWithSubtitle({ label, subtitle, value, percentage, color }: any) {
+  return (
+    <div className="analytics-progress-item" style={{ marginBottom: '1rem' }}>
+      <div className="analytics-progress-header" style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '0.5rem'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+          <span className="analytics-progress-label" style={{ color: '#e2e8f0', fontSize: '0.9rem' }}>{label}</span>
+          <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{subtitle}</span>
+        </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
             {value.toLocaleString()}

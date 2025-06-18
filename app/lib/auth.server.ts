@@ -100,24 +100,10 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
     return null;
   }
 
-  // Credenciais temporárias para demonstração - SEMPRE VERIFICAR PRIMEIRO
-  if (emailSanitizado === 'admin@raiseup.com.br' && senha === 'admin123') {
-    console.log('Login bem-sucedido com credenciais temporárias');
-    return {
-      id: 'temp-admin-1',
-      email: 'admin@raiseup.com.br',
-      nome: 'Administrador RaiseUp',
-      ativo: true,
-      ultimo_login: new Date().toISOString(),
-      criado_em: new Date().toISOString(),
-      atualizado_em: new Date().toISOString()
-    };
-  }
-
-  console.log('Credenciais temporárias não conferiram, tentando Supabase...');
-
   try {
-    // Tentar buscar no Supabase
+    console.log('Tentando autenticação via Supabase primeiro...');
+    
+    // Tentar buscar no Supabase PRIMEIRO
     const { data: usuario, error } = await supabase
       .from('usuarios')
       .select('*')
@@ -127,29 +113,57 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
 
     console.log('Resultado da busca no Supabase:', { usuario, error });
 
-    if (error || !usuario) {
-      console.log('Usuário não encontrado no Supabase');
-      return null;
-    }
+    if (usuario && !error) {
+      const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
+      console.log('Senha válida:', senhaValida);
+      
+      if (senhaValida) {
+        // Atualizar último login
+        await supabase
+          .from('usuarios')
+          .update({ ultimo_login: new Date().toISOString() })
+          .eq('id', usuario.id);
 
-    const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
-    console.log('Senha válida:', senhaValida);
+        console.log('Login bem-sucedido via Supabase');
+        return usuario;
+      }
+    }
     
-    if (!senhaValida) {
-      console.log('Senha inválida');
-      return null;
+    console.log('Não foi possível autenticar via Supabase, tentando credenciais temporárias...');
+    
+    // Fallback para credenciais temporárias apenas se Supabase falhar
+    if (emailSanitizado === 'admin@raiseup.com.br' && senha === 'admin123') {
+      console.log('Login bem-sucedido com credenciais temporárias (fallback)');
+      return {
+        id: 'temp-admin-1',
+        email: 'admin@raiseup.com.br',
+        nome: 'Administrador RaiseUp (Temporário)',
+        ativo: true,
+        ultimo_login: new Date().toISOString(),
+        criado_em: new Date().toISOString(),
+        atualizado_em: new Date().toISOString()
+      };
     }
-
-    // Atualizar último login
-    await supabase
-      .from('usuarios')
-      .update({ ultimo_login: new Date().toISOString() })
-      .eq('id', usuario.id);
-
-    console.log('Login bem-sucedido via Supabase');
-    return usuario;
+    
+    console.log('Credenciais inválidas');
+    return null;
   } catch (error) {
-    console.error('Erro na autenticação via Supabase:', error);
+    console.error('Erro na autenticação:', error);
+    
+    // Em caso de erro, tentar credenciais temporárias como último recurso
+    if (emailSanitizado === 'admin@raiseup.com.br' && senha === 'admin123') {
+      console.log('Login com credenciais temporárias devido a erro no Supabase');
+      return {
+        id: 'temp-admin-1',
+        email: 'admin@raiseup.com.br',
+        nome: 'Administrador RaiseUp (Modo Emergência)',
+        ativo: true,
+        ultimo_login: new Date().toISOString(),
+        criado_em: new Date().toISOString(),
+        atualizado_em: new Date().toISOString()
+      };
+    }
+    
     return null;
   }
 }

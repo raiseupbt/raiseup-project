@@ -30,6 +30,7 @@ export interface AnalyticsData {
   trafficSources: Array<{ source: string; sessions: number; percentage: number }>;
   devices: Array<{ device: string; sessions: number; percentage: number }>;
   locations: Array<{ country: string; sessions: number; percentage: number }>;
+  cities: Array<{ city: string; country: string; sessions: number; percentage: number }>;
 }
 
 export async function getAnalyticsData(): Promise<AnalyticsData> {
@@ -42,7 +43,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 
   try {
     // Requisições paralelas para otimizar performance
-    const [overviewReport, pagesReport, sourcesReport, devicesReport, locationsReport] = await Promise.all([
+    const [overviewReport, pagesReport, sourcesReport, devicesReport, locationsReport, citiesReport] = await Promise.all([
       // Métricas gerais
       client.runReport({
         property: `properties/${GA4_PROPERTY_ID}`,
@@ -93,6 +94,16 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
         metrics: [{ name: 'sessions' }],
         orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
         limit: 10
+      }),
+
+      // Cidades
+      client.runReport({
+        property: `properties/${GA4_PROPERTY_ID}`,
+        dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+        dimensions: [{ name: 'city' }, { name: 'country' }],
+        metrics: [{ name: 'sessions' }],
+        orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+        limit: 15
       })
     ]);
 
@@ -141,6 +152,15 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       percentage: parseFloat(((parseInt(row.metricValues?.[0]?.value || '0') / totalSessions) * 100).toFixed(1))
     })) || [];
 
+    // Processar cidades
+    const citiesData = citiesReport[0];
+    const cities = citiesData.rows?.map((row) => ({
+      city: row.dimensionValues?.[0]?.value || 'Desconhecida',
+      country: row.dimensionValues?.[1]?.value || 'Desconhecido',
+      sessions: parseInt(row.metricValues?.[0]?.value || '0'),
+      percentage: parseFloat(((parseInt(row.metricValues?.[0]?.value || '0') / totalSessions) * 100).toFixed(1))
+    })) || [];
+
     return {
       totalSessions,
       totalUsers,
@@ -150,7 +170,8 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       topPages: topPages.slice(0, 6),
       trafficSources: trafficSources.slice(0, 5),
       devices: devices.slice(0, 3),
-      locations: locations.slice(0, 5)
+      locations: locations.slice(0, 5),
+      cities: cities.slice(0, 8)
     };
 
   } catch (error) {
@@ -193,6 +214,16 @@ function getSimulatedData(): AnalyticsData {
       { country: 'Estados Unidos', sessions: 770, percentage: 5.0 },
       { country: 'Argentina', sessions: 460, percentage: 3.0 },
       { country: 'Outros', sessions: 300, percentage: 1.9 }
+    ],
+    cities: [
+      { city: 'São Paulo', country: 'Brasil', sessions: 4320, percentage: 28.0 },
+      { city: 'Rio de Janeiro', country: 'Brasil', sessions: 2850, percentage: 18.5 },
+      { city: 'Campinas', country: 'Brasil', sessions: 1680, percentage: 10.9 },
+      { city: 'Belo Horizonte', country: 'Brasil', sessions: 1240, percentage: 8.0 },
+      { city: 'Porto Alegre', country: 'Brasil', sessions: 980, percentage: 6.4 },
+      { city: 'Brasília', country: 'Brasil', sessions: 850, percentage: 5.5 },
+      { city: 'Lisboa', country: 'Portugal', sessions: 730, percentage: 4.7 },
+      { city: 'Salvador', country: 'Brasil', sessions: 620, percentage: 4.0 }
     ]
   };
 }

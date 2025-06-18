@@ -2,10 +2,11 @@ import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { requireUser } from "~/lib/auth.server";
 import { supabase } from "~/lib/supabase.server";
+import AdminLayout from "~/components/AdminLayout";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Proteger rota com autenticação
-  await requireUser(request);
+  const user = await requireUser(request);
 
   try {
     // Buscar dados reais do Supabase
@@ -37,6 +38,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     // Dados para o dashboard
     return json({
+      user,
       estatisticas: {
         totalContatos,
         totalArtigos,
@@ -52,6 +54,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     
     // Fallback com dados mockados em caso de erro
     return json({
+      user,
       estatisticas: {
         totalContatos: 0,
         totalArtigos: 0,
@@ -66,7 +69,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Admin() {
-  const { estatisticas, contatosRecentes, artigosPopulares } = useLoaderData<typeof loader>();
+  const { user, estatisticas, contatosRecentes, artigosPopulares } = useLoaderData<typeof loader>();
 
   // Função para formatar data
   const formatDate = (dateString: string) => {
@@ -89,120 +92,8 @@ export default function Admin() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0a0f1c 0%, #1a1a2e 50%, #16213e 100%)',
-      color: '#e2e8f0',
-      fontFamily: 'Inter, sans-serif'
-    }}>
-      {/* Enhanced Header */}
-      <header style={{
-        background: 'rgba(26, 32, 44, 0.95)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(14, 165, 233, 0.3)',
-        padding: '1rem 0',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100
-      }}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '0 2rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-            <Link to="/" style={{
-              color: '#0ea5e9',
-              textDecoration: 'none',
-              fontSize: '1.8rem',
-              fontWeight: '800',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '36px', filter: 'brightness(0) invert(1)' }} />
-              <span>Admin</span>
-            </Link>
-            <nav style={{ display: 'flex', gap: '0.5rem' }}>
-              <span style={{
-                color: '#0ea5e9',
-                padding: '0.75rem 1.5rem',
-                background: 'rgba(14, 165, 233, 0.15)',
-                borderRadius: '12px',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                border: '1px solid rgba(14, 165, 233, 0.3)'
-              }}>
-                📊 Dashboard
-              </span>
-              <Link to="/admin/contatos" style={{
-                color: '#94a3b8',
-                textDecoration: 'none',
-                padding: '0.75rem 1.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                borderRadius: '12px',
-                transition: 'all 0.3s ease'
-              }}>
-                📞 Contatos
-              </Link>
-              <Link to="/admin/artigos" style={{
-                color: '#94a3b8',
-                textDecoration: 'none',
-                padding: '0.75rem 1.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                borderRadius: '12px',
-                transition: 'all 0.3s ease'
-              }}>
-                📝 Artigos
-              </Link>
-              <Link to="/admin/analytics" style={{
-                color: '#94a3b8',
-                textDecoration: 'none',
-                padding: '0.75rem 1.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                borderRadius: '12px',
-                transition: 'all 0.3s ease'
-              }}>
-                📈 Analytics
-              </Link>
-            </nav>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{
-              padding: '0.5rem 1rem',
-              background: 'rgba(34, 197, 94, 0.1)',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              color: '#22c55e',
-              border: '1px solid rgba(34, 197, 94, 0.3)'
-            }}>
-              🟢 Sistema Online
-            </div>
-            <Link to="/admin/logout" style={{
-              color: '#f87171',
-              textDecoration: 'none',
-              fontSize: '0.9rem',
-              padding: '0.5rem 1rem',
-              borderRadius: '8px',
-              border: '1px solid rgba(248, 113, 113, 0.3)'
-            }}>
-              ← Sair
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main style={{
-        maxWidth: '1400px',
-        margin: '0 auto',
-        padding: '2rem'
-      }}>
+    <AdminLayout user={user} currentPage="dashboard" pageTitle="Dashboard">
+      <div>
         {/* Welcome Header */}
         <div style={{
           marginBottom: '3rem',
@@ -725,8 +616,7 @@ export default function Admin() {
           <p style={{ margin: 0, fontSize: '0.9rem' }}>
             © 2025 RaiseUp - Automação com IA Humanizada | Dashboard Administrativo v1.0
           </p>
-        </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

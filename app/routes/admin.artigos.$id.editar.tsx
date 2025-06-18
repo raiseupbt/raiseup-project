@@ -1,18 +1,43 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { useActionData, useNavigation, Form, Link } from "@remix-run/react";
+import { useActionData, useLoaderData, useNavigation, Form, Link } from "@remix-run/react";
 import { requireUser } from "~/lib/auth.server";
 import { supabase } from "~/lib/supabase.server";
 
-
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const user = await requireUser(request);
-  return json({ user });
+  const { id } = params;
+
+  if (!id) {
+    throw new Response("ID do artigo não informado", { status: 400 });
+  }
+
+  try {
+    const { data: artigo, error } = await supabase
+      .from('artigos')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !artigo) {
+      throw new Response("Artigo não encontrado", { status: 404 });
+    }
+
+    return json({ user, artigo });
+  } catch (error) {
+    console.error('Erro ao carregar artigo:', error);
+    throw new Response("Erro ao carregar artigo", { status: 500 });
+  }
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request, params }: ActionFunctionArgs) => {
   await requireUser(request);
+  const { id } = params;
   
+  if (!id) {
+    throw new Response("ID do artigo não informado", { status: 400 });
+  }
+
   const formData = await request.formData();
   const titulo = formData.get('titulo')?.toString();
   const conteudo = formData.get('conteudo')?.toString();
@@ -38,7 +63,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   try {
     const { data, error } = await supabase
       .from('artigos')
-      .insert({
+      .update({
         titulo,
         conteudo,
         resumo,
@@ -49,23 +74,23 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         meta_description: metaDescription,
         meta_keywords: metaKeywords,
         tempo_leitura: tempoLeitura,
-        autor: 'Admin',
-        visualizacoes: 0
+        atualizado_em: new Date().toISOString()
       })
+      .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      console.error('Erro ao criar artigo:', error);
+      console.error('Erro ao atualizar artigo:', error);
       return json({ 
-        erro: 'Erro ao criar artigo. Verifique se o slug não está duplicado.',
+        erro: 'Erro ao atualizar artigo. Verifique se o slug não está duplicado.',
         values: { titulo, conteudo, resumo, slug, ativo, destaque, tags: tagsString, meta_description: metaDescription, meta_keywords: metaKeywords, tempo_leitura: tempoLeitura }
       }, { status: 400 });
     }
 
     return redirect('/admin/artigos');
   } catch (error) {
-    console.error('Erro ao criar artigo:', error);
+    console.error('Erro ao atualizar artigo:', error);
     return json({ 
       erro: 'Erro interno. Tente novamente.',
       values: { titulo, conteudo, resumo, slug, ativo, destaque, tags: tagsString, meta_description: metaDescription, meta_keywords: metaKeywords, tempo_leitura: tempoLeitura }
@@ -73,12 +98,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 };
 
-export default function NovoArtigo() {
+export default function EditarArtigo() {
+  const { user, artigo } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
-  const values = actionData?.values || {};
+  const values = actionData?.values || {
+    titulo: artigo.titulo,
+    conteudo: artigo.conteudo,
+    resumo: artigo.resumo,
+    slug: artigo.slug,
+    ativo: artigo.ativo,
+    destaque: artigo.destaque,
+    tags: Array.isArray(artigo.tags) ? artigo.tags.join(', ') : '',
+    meta_description: artigo.meta_description,
+    meta_keywords: artigo.meta_keywords,
+    tempo_leitura: artigo.tempo_leitura
+  };
 
   return (
     <div style={{
@@ -123,7 +160,7 @@ export default function NovoArtigo() {
               WebkitTextFillColor: 'transparent',
               margin: 0
             }}>
-              Novo Artigo
+              Editar Artigo
             </h1>
           </div>
         </div>
@@ -528,7 +565,7 @@ Seu conteúdo aqui em Markdown...
                   type="checkbox"
                   name="ativo"
                   id="ativo"
-                  defaultChecked={values.ativo !== false}
+                  defaultChecked={values.ativo}
                   style={{
                     width: '18px',
                     height: '18px',
@@ -638,7 +675,7 @@ Seu conteúdo aqui em Markdown...
                   </>
                 ) : (
                   <>
-                    💾 Salvar Artigo
+                    💾 Atualizar Artigo
                   </>
                 )}
               </button>

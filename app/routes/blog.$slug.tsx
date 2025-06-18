@@ -334,7 +334,7 @@ export default function BlogPost() {
         <header className="article-header">
           <nav className="article-nav">
             <Link to="/" className="article-logo">
-              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '40px', filter: 'brightness(0) invert(1)' }} />
+              <img src="/logo_raiseup.png" alt="RaiseUp Logo" style={{ height: '80px', filter: 'brightness(0) invert(1)' }} />
             </Link>
             <Link to="/blog" className="article-back">
               ← Voltar ao Blog
