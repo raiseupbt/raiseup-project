@@ -15,7 +15,29 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   
   try {
     const analyticsData = await getAnalyticsData(period);
-    return json({ user, analyticsData, currentPeriod: period });
+    
+    // Garantir que todas as propriedades existam com fallbacks seguros
+    const safeAnalyticsData = {
+      totalSessions: analyticsData.totalSessions || 0,
+      totalUsers: analyticsData.totalUsers || 0,
+      totalPageviews: analyticsData.totalPageviews || 0,
+      bounceRate: analyticsData.bounceRate || 0,
+      avgSessionDuration: analyticsData.avgSessionDuration || '0m 0s',
+      topPages: analyticsData.topPages || [],
+      trafficSources: analyticsData.trafficSources || [],
+      devices: analyticsData.devices || [],
+      locations: analyticsData.locations || [],
+      cities: analyticsData.cities || [],
+      hourlyData: analyticsData.hourlyData || [],
+      realtimeUsers: analyticsData.realtimeUsers || 0,
+      searchTerms: analyticsData.searchTerms || [],
+      newVsReturning: analyticsData.newVsReturning || [],
+      pageEngagement: analyticsData.pageEngagement || [],
+      performance: analyticsData.performance || [],
+      conversions: analyticsData.conversions || []
+    };
+    
+    return json({ user, analyticsData: safeAnalyticsData, currentPeriod: period });
   } catch (error) {
     console.error('Erro ao carregar analytics:', error);
     // Fallback para dados simulados em caso de erro
@@ -29,7 +51,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       trafficSources: [],
       devices: [],
       locations: [],
-      cities: []
+      cities: [],
+      hourlyData: [],
+      realtimeUsers: 0,
+      searchTerms: [],
+      newVsReturning: [],
+      pageEngagement: [],
+      performance: [],
+      conversions: []
     };
     return json({ user, analyticsData, currentPeriod: period });
   }
@@ -287,7 +316,7 @@ export default function AdminAnalytics() {
           />
           <StatCard
             title="Online Agora"
-            value={analyticsData.realtimeUsers.toString()}
+            value={(analyticsData.realtimeUsers || 0).toString()}
             subtitle="Usuários ativos"
             color="#10b981"
             icon="🟢"
@@ -505,7 +534,7 @@ export default function AdminAnalytics() {
                   fontSize: '0.75rem',
                   color: '#94a3b8'
                 }}>
-                  {analyticsData.hourlyData.map((hour, index) => (
+                  {(analyticsData.hourlyData || []).map((hour, index) => (
                     <div key={hour.hour} style={{
                       textAlign: 'center',
                       padding: '0.5rem 0.25rem',
@@ -522,7 +551,7 @@ export default function AdminAnalytics() {
             )}
 
             {/* Termos de Busca */}
-            {analyticsData.searchTerms.length > 0 && (
+            {(analyticsData.searchTerms || []).length > 0 && (
               <div className="analytics-content-card" style={{
                 background: 'rgba(26, 32, 44, 0.8)',
                 backdropFilter: 'blur(20px)',
@@ -542,7 +571,7 @@ export default function AdminAnalytics() {
                 }}>
                   🔍 Termos de Busca
                 </h2>
-                {analyticsData.searchTerms.map((term, index) => (
+                {(analyticsData.searchTerms || []).map((term, index) => (
                   <ProgressBar
                     key={term.term}
                     label={term.term}
@@ -575,7 +604,7 @@ export default function AdminAnalytics() {
                 }}>
                   👥 Novos vs Recorrentes
                 </h2>
-                {analyticsData.newVsReturning.map((segment, index) => (
+                {(analyticsData.newVsReturning || []).map((segment, index) => (
                   <ProgressBar
                     key={segment.type}
                     label={segment.type}
@@ -607,7 +636,7 @@ export default function AdminAnalytics() {
               }}>
                 📈 Tempo na Página
               </h2>
-              {analyticsData.pageEngagement.map((item, index) => (
+              {(analyticsData.pageEngagement || []).map((item, index) => (
                 <div key={item.page} style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
@@ -648,7 +677,7 @@ export default function AdminAnalytics() {
               }}>
                 ⚡ Performance
               </h2>
-              {analyticsData.performance.map((item, index) => (
+              {(analyticsData.performance || []).map((item, index) => (
                 <div key={item.metric} style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
@@ -689,7 +718,7 @@ export default function AdminAnalytics() {
               }}>
                 🎯 Conversões
               </h2>
-              {analyticsData.conversions.map((item, index) => (
+              {(analyticsData.conversions || []).map((item, index) => (
                 <div key={item.goal} style={{ marginBottom: '1rem' }}>
                   <div style={{
                     display: 'flex',
