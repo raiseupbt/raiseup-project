@@ -111,7 +111,7 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
     // Tentar buscar no Supabase PRIMEIRO
     const { data: usuario, error } = await supabase
       .from('usuarios')
-      .select('*')
+      .select('id, email, senha_hash, nome, ativo, ultimo_login, criado_em, atualizado_em')
       .eq('email', emailSanitizado)
       .eq('ativo', true)
       .single();
@@ -119,7 +119,10 @@ export async function login(email: string, senha: string): Promise<Usuario | nul
     console.log('Resultado da busca no Supabase:', { 
       usuario: usuario ? 'Usuário encontrado' : 'Usuário não encontrado', 
       email: usuario?.email,
-      error: error?.message || 'Sem erro'
+      hasHash: usuario?.senha_hash ? 'Sim' : 'Não',
+      error: error?.message || 'Sem erro',
+      errorCode: error?.code || 'N/A',
+      errorDetails: error?.details || 'N/A'
     });
 
     if (usuario && !error) {

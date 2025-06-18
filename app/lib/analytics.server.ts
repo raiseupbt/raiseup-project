@@ -19,10 +19,18 @@ function getAnalyticsClient() {
       }
       // Opção 2: JSON como string na variável de ambiente
       else if (GOOGLE_CREDENTIALS_JSON) {
-        const credentials = JSON.parse(GOOGLE_CREDENTIALS_JSON);
-        analyticsDataClient = new BetaAnalyticsDataClient({
-          credentials
-        });
+        try {
+          // Limpar e normalizar o JSON
+          const cleanJson = GOOGLE_CREDENTIALS_JSON.trim().replace(/\s+/g, ' ');
+          const credentials = JSON.parse(cleanJson);
+          console.log('Credenciais do Google Analytics carregadas com sucesso');
+          analyticsDataClient = new BetaAnalyticsDataClient({
+            credentials
+          });
+        } catch (parseError) {
+          console.error('Erro ao fazer parse das credenciais JSON:', parseError);
+          console.error('JSON recebido:', GOOGLE_CREDENTIALS_JSON?.substring(0, 100) + '...');
+        }
       }
     } catch (error) {
       console.error('Erro ao inicializar Google Analytics:', error);
