@@ -92,10 +92,130 @@ export default function Admin() {
   };
 
   return (
-    <AdminLayout user={user} currentPage="dashboard" pageTitle="Dashboard">
-      <div>
+    <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @media (max-width: 768px) {
+            .dashboard-welcome {
+              padding: 1.5rem !important;
+              border-radius: 16px !important;
+            }
+            
+            .dashboard-welcome h1 {
+              font-size: 2rem !important;
+            }
+            
+            .dashboard-welcome p {
+              font-size: 1rem !important;
+            }
+            
+            .dashboard-stats-grid {
+              grid-template-columns: 1fr !important;
+              gap: 1rem !important;
+            }
+            
+            .dashboard-stat-card {
+              padding: 1.5rem !important;
+              border-radius: 16px !important;
+            }
+            
+            .dashboard-stat-value {
+              font-size: 2rem !important;
+            }
+            
+            .dashboard-content-grid {
+              grid-template-columns: 1fr !important;
+              gap: 1.5rem !important;
+            }
+            
+            .dashboard-section {
+              padding: 1.5rem !important;
+              border-radius: 16px !important;
+            }
+            
+            .dashboard-section-header {
+              flex-direction: column !important;
+              align-items: flex-start !important;
+              gap: 1rem !important;
+            }
+            
+            .dashboard-contact-item {
+              padding: 1rem !important;
+            }
+            
+            .dashboard-contact-meta {
+              grid-template-columns: 1fr !important;
+              gap: 0.5rem !important;
+            }
+            
+            .dashboard-quick-actions {
+              padding: 2rem 1rem !important;
+              border-radius: 20px !important;
+            }
+            
+            .dashboard-quick-actions h2 {
+              font-size: 1.5rem !important;
+            }
+            
+            .dashboard-actions-grid {
+              grid-template-columns: repeat(2, 1fr) !important;
+              gap: 0.75rem !important;
+            }
+            
+            .dashboard-action-button {
+              padding: 1rem !important;
+              border-radius: 12px !important;
+            }
+            
+            .dashboard-action-button div:first-child {
+              font-size: 1.5rem !important;
+            }
+            
+            .dashboard-footer {
+              padding: 1.5rem 1rem !important;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            .dashboard-welcome {
+              padding: 1rem !important;
+            }
+            
+            .dashboard-welcome h1 {
+              font-size: 1.75rem !important;
+            }
+            
+            .dashboard-stat-card {
+              padding: 1rem !important;
+            }
+            
+            .dashboard-stat-value {
+              font-size: 1.75rem !important;
+            }
+            
+            .dashboard-section {
+              padding: 1rem !important;
+            }
+            
+            .dashboard-contact-item {
+              padding: 0.75rem !important;
+            }
+            
+            .dashboard-actions-grid {
+              grid-template-columns: 1fr !important;
+            }
+            
+            .dashboard-quick-actions {
+              padding: 1.5rem 0.75rem !important;
+            }
+          }
+        `
+      }} />
+      
+      <AdminLayout user={user} currentPage="dashboard" pageTitle="Dashboard">
+        <div>
         {/* Welcome Header */}
-        <div style={{
+        <div className="dashboard-welcome" style={{
           marginBottom: '3rem',
           background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
           padding: '2rem',
@@ -123,14 +243,14 @@ export default function Admin() {
         </div>
 
         {/* Enhanced Statistics Cards Grid */}
-        <div style={{
+        <div className="dashboard-stats-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '1.5rem',
           marginBottom: '3rem'
         }}>
           {/* Total Contacts Card */}
-          <div style={{
+          <div className="dashboard-stat-card" style={{
             background: 'rgba(26, 32, 44, 0.8)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(14, 165, 233, 0.3)',
@@ -153,7 +273,7 @@ export default function Admin() {
                 <h3 style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: '600' }}>
                   TOTAL DE CONTATOS
                 </h3>
-                <p style={{ fontSize: '2.5rem', fontWeight: '800', color: '#0ea5e9', margin: 0 }}>
+                <p className="dashboard-stat-value" style={{ fontSize: '2.5rem', fontWeight: '800', color: '#0ea5e9', margin: 0 }}>
                   {estatisticas.totalContatos}
                 </p>
               </div>
@@ -268,7 +388,7 @@ export default function Admin() {
 
 
         {/* Enhanced Content Grid */}
-        <div style={{
+        <div className="dashboard-content-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
           gap: '2rem'
@@ -489,7 +609,7 @@ export default function Admin() {
 
 
         {/* Enhanced Quick Actions */}
-        <div style={{
+        <div className="dashboard-quick-actions" style={{
           marginTop: '2rem',
           padding: '2.5rem',
           background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 50%, #7c3aed 100%)',
@@ -524,14 +644,14 @@ export default function Admin() {
             Acesse rapidamente as principais funcionalidades da plataforma
           </p>
           
-          <div style={{
+          <div className="dashboard-actions-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: '1rem',
             maxWidth: '800px',
             margin: '0 auto'
           }}>
-            <Link to="/admin/contatos" style={{
+            <Link to="/admin/contatos" className="dashboard-action-button" style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -549,7 +669,7 @@ export default function Admin() {
               <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Ver todos os leads</div>
             </Link>
 
-            <Link to="/admin/artigos/novo" style={{
+            <Link to="/admin/artigos/novo" className="dashboard-action-button" style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -567,7 +687,7 @@ export default function Admin() {
               <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Criar conteúdo</div>
             </Link>
 
-            <Link to="/admin/analytics" style={{
+            <Link to="/admin/analytics" className="dashboard-action-button" style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -585,7 +705,7 @@ export default function Admin() {
               <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Relatórios</div>
             </Link>
 
-            <Link to="/" style={{
+            <Link to="/" className="dashboard-action-button" style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -606,7 +726,7 @@ export default function Admin() {
         </div>
 
         {/* Footer */}
-        <div style={{
+        <div className="dashboard-footer" style={{
           marginTop: '3rem',
           padding: '2rem',
           textAlign: 'center',
@@ -619,5 +739,6 @@ export default function Admin() {
         </div>
       </div>
     </AdminLayout>
+    </>
   );
 }

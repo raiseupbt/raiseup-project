@@ -58,7 +58,7 @@ export default function AdminLayout({
             
             .admin-header {
               padding: 0.75rem 1rem !important;
-              position: fixed !important;
+              position: relative !important;
               width: 100% !important;
               left: 0 !important;
               right: 0 !important;
@@ -75,14 +75,16 @@ export default function AdminLayout({
             }
             
             .admin-user-section {
-              flex-direction: column !important;
-              align-items: flex-start !important;
+              flex-direction: row !important;
+              align-items: center !important;
               gap: 0.5rem !important;
               width: 100% !important;
+              justify-content: space-between !important;
             }
             
             .admin-user-info {
               padding: 0.4rem 0.75rem !important;
+              flex: 1 !important;
             }
             
             .admin-nav-container {
@@ -90,6 +92,9 @@ export default function AdminLayout({
               overflow-x: auto !important;
               scrollbar-width: none !important;
               -ms-overflow-style: none !important;
+              margin: 0 -1rem !important;
+              padding-left: 1rem !important;
+              padding-right: 1rem !important;
             }
             
             .admin-nav-container::-webkit-scrollbar {
@@ -99,6 +104,7 @@ export default function AdminLayout({
             .admin-nav-items {
               flex-wrap: nowrap !important;
               min-width: max-content !important;
+              gap: 0.5rem !important;
             }
             
             .admin-nav-link {
@@ -114,6 +120,23 @@ export default function AdminLayout({
             
             .admin-main-container {
               padding: 1rem !important;
+            }
+            
+            .admin-page-header {
+              flex-direction: column !important;
+              align-items: flex-start !important;
+              gap: 1rem !important;
+            }
+            
+            .admin-page-actions {
+              width: 100% !important;
+              display: flex !important;
+              justify-content: flex-start !important;
+            }
+            
+            .admin-page-actions select {
+              width: 100% !important;
+              max-width: 200px !important;
             }
           }
           
@@ -291,7 +314,7 @@ export default function AdminLayout({
 
         {/* Título da Página e Ações */}
         {(pageTitle || pageActions) && (
-          <div style={{
+          <div className="admin-page-header" style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -312,7 +335,7 @@ export default function AdminLayout({
               </h1>
             )}
             {pageActions && (
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div className="admin-page-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                 {pageActions}
               </div>
             )}

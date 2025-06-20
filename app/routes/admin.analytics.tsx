@@ -100,6 +100,10 @@ export default function AdminAnalytics() {
               gap: 1rem !important;
             }
             
+            .analytics-content-grid .analytics-content-card {
+              max-width: 100% !important;
+            }
+            
             .analytics-stat-card {
               padding: 1.25rem !important;
             }
