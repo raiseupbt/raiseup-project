@@ -2,10 +2,10 @@ import type { MetaFunction } from "@remix-run/node";
 import Footer from "~/components/Footer";
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "Política de Privacidade - RaiseUp" },
-    { name: "description", content: "Política de Privacidade da RaiseUp Business Technology - Como tratamos e protegemos seus dados pessoais" },
-  ];
+  return {
+    title: "Política de Privacidade - RaiseUp",
+    description: "Política de Privacidade da RaiseUp Business Technology - Como tratamos e protegemos seus dados pessoais"
+  };
 };
 
 export default function PoliticaPrivacidade() {

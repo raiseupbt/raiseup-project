@@ -8,10 +8,10 @@ import {
 import type { MetaFunction } from "@remix-run/node";
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "RaiseUp - Automação com IA Humanizada" },
-    { name: "description", content: "RaiseUp oferece soluções de automação empresarial com IA para atendimento 24/7, gestão de mídias sociais e otimização de processos." },
-  ];
+  return {
+    title: "RaiseUp - Automação com IA Humanizada",
+    description: "RaiseUp oferece soluções de automação empresarial com IA para atendimento 24/7, gestão de mídias sociais e otimização de processos."
+  };
 };
 
 export default function App() {

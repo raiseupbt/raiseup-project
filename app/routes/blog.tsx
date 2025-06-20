@@ -5,10 +5,10 @@ import { supabase } from "~/lib/supabase.server";
 import Footer from "~/components/Footer";
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "Blog - RaiseUp" },
-    { name: "description", content: "Blog da RaiseUp: Artigos sobre automação empresarial, IA, produtividade e tendências em tecnologia. Conteúdo especializado para transformar seu negócio." },
-  ];
+  return {
+    title: "Blog - RaiseUp",
+    description: "Blog da RaiseUp: Artigos sobre automação empresarial, IA, produtividade e tendências em tecnologia. Conteúdo especializado para transformar seu negócio."
+  };
 };
 
 export const loader = async () => {

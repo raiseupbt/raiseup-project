@@ -5,10 +5,10 @@ import { supabase } from "~/lib/supabase.server";
 import Footer from "~/components/Footer";
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "Contato - RaiseUp" },
-    { name: "description", content: "Entre em contato com a RaiseUp para descobrir como nossa automação com IA pode transformar seu negócio. Consultoria gratuita disponível." },
-  ];
+  return {
+    title: "Contato - RaiseUp",
+    description: "Entre em contato com a RaiseUp para descobrir como nossa automação com IA pode transformar seu negócio. Consultoria gratuita disponível."
+  };
 };
 
 // Validação dos dados

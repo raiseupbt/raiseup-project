@@ -3,10 +3,10 @@ import type { MetaFunction } from "@remix-run/node";
 import Footer from "~/components/Footer";
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "Agentes de Produtividade - RaiseUp" },
-    { name: "description", content: "Agentes de Produtividade da RaiseUp: Automação de processos internos e integração de sistemas para máxima eficiência operacional." },
-  ];
+  return {
+    title: "Agentes de Produtividade - RaiseUp",
+    description: "Agentes de Produtividade da RaiseUp: Automação de processos internos e integração de sistemas para máxima eficiência operacional."
+  };
 };
 
 export default function AgentesProdutividade() {

@@ -6,17 +6,17 @@ import { marked } from 'marked';
 import Footer from "~/components/Footer";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  if (!data?.artigo) {
-    return [
-      { title: "Artigo não encontrado - RaiseUp" },
-      { name: "description", content: "O artigo solicitado não foi encontrado." },
-    ];
+  if (!data?.post) {
+    return {
+      title: "Artigo não encontrado - RaiseUp",
+      description: "O artigo solicitado não foi encontrado."
+    };
   }
   
-  return [
-    { title: `${data.artigo.titulo} - RaiseUp Blog` },
-    { name: "description", content: data.artigo.resumo },
-  ];
+  return {
+    title: `${data.post.titulo} - RaiseUp Blog`,
+    description: data.post.resumo
+  };
 };
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
