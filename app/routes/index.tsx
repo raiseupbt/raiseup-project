@@ -31,34 +31,42 @@ export default function Index() {
             overflow-x: hidden;
           }
 
-          /* Garantir que o footer tenha a fonte e estilos corretos */
-          .footer-container,
-          .footer-container *,
-          .footer-container h3,
-          .footer-container p,
-          .footer-container a,
-          .footer-container i {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            font-size: initial !important;
-            line-height: initial !important;
-          }
+          /* Corrigir especificamente os problemas do footer na homepage */
           
-          /* Garantir que os ícones do footer funcionem corretamente */
-          .footer-container .fas,
-          .footer-container .fab,
-          .footer-container i[class*="fa-"] {
+          /* Ícones Font Awesome */
+          .footer-container i.fas,
+          .footer-container i.fab {
             font-family: "Font Awesome 6 Free" !important;
             font-weight: 900 !important;
             display: inline-block !important;
             font-style: normal !important;
             font-variant: normal !important;
             text-rendering: auto !important;
+            -webkit-font-smoothing: antialiased !important;
             line-height: 1 !important;
           }
           
-          .footer-container .fab {
+          .footer-container i.fab {
             font-family: "Font Awesome 6 Brands" !important;
             font-weight: 400 !important;
+          }
+          
+          /* Texto do copyright pequeno e cinza */
+          .footer-container .footer-bottom {
+            font-size: 0.9rem !important;
+            color: #64748b !important;
+          }
+          
+          .footer-container .footer-bottom > div p {
+            font-size: 0.9rem !important;
+            color: #64748b !important;
+            margin: 0 !important;
+          }
+          
+          .footer-container .footer-bottom > div p + p {
+            font-size: 0.8rem !important;
+            color: #64748b !important;
+            margin: 0.25rem 0 0 0 !important;
           }
 
           :root {
