@@ -31,10 +31,34 @@ export default function Index() {
             overflow-x: hidden;
           }
 
-          /* Garantir que o footer tenha a fonte correta */
+          /* Garantir que o footer tenha a fonte e estilos corretos */
           .footer-container,
-          .footer-container * {
+          .footer-container *,
+          .footer-container h3,
+          .footer-container p,
+          .footer-container a,
+          .footer-container i {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            font-size: initial !important;
+            line-height: initial !important;
+          }
+          
+          /* Garantir que os ícones do footer funcionem corretamente */
+          .footer-container .fas,
+          .footer-container .fab,
+          .footer-container i[class*="fa-"] {
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+            display: inline-block !important;
+            font-style: normal !important;
+            font-variant: normal !important;
+            text-rendering: auto !important;
+            line-height: 1 !important;
+          }
+          
+          .footer-container .fab {
+            font-family: "Font Awesome 6 Brands" !important;
+            font-weight: 400 !important;
           }
 
           :root {
