@@ -1,4 +1,14 @@
 
+import type { MetaFunction } from "@remix-run/node";
+import Footer from "~/components/Footer";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Agentes de Mídias Sociais - RaiseUp" },
+    { name: "description", content: "Agentes de Mídias Sociais da RaiseUp: Gestão automatizada de redes sociais com IA. Postagens inteligentes, respostas automáticas e análise de sentimento." },
+  ];
+};
+
 export default function AgentesMidiasSociais() {
   return (
     <>
@@ -1057,6 +1067,7 @@ export default function AgentesMidiasSociais() {
           });
         `
       }} />
+      <Footer />
     </>
   );
 }

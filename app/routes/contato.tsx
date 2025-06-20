@@ -1,7 +1,15 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useActionData, Link } from "@remix-run/react";
 import { supabase } from "~/lib/supabase.server";
+import Footer from "~/components/Footer";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Contato - RaiseUp" },
+    { name: "description", content: "Entre em contato com a RaiseUp para descobrir como nossa automação com IA pode transformar seu negócio. Consultoria gratuita disponível." },
+  ];
+};
 
 // Validação dos dados
 function validarFormulario(data: any) {
@@ -561,6 +569,7 @@ export default function Contato() {
           </div>
         </main>
       </div>
+      <Footer />
     </>
   );
 }

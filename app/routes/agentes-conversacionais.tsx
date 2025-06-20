@@ -1,4 +1,14 @@
 
+import type { MetaFunction } from "@remix-run/node";
+import Footer from "~/components/Footer";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Agentes Conversacionais - RaiseUp" },
+    { name: "description", content: "Agentes Conversacionais da RaiseUp: Atendimento 24/7 inteligente para WhatsApp e outras plataformas. Automatize o atendimento mantendo o toque humano." },
+  ];
+};
+
 export default function AgentesConversacionais() {
   return (
     <>
@@ -997,6 +1007,7 @@ export default function AgentesConversacionais() {
           });
         `
       }} />
+      <Footer />
     </>
   );
 }

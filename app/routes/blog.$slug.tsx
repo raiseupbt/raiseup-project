@@ -1,8 +1,23 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import { supabase } from "~/lib/supabase.server";
 import { marked } from 'marked';
+import Footer from "~/components/Footer";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  if (!data?.artigo) {
+    return [
+      { title: "Artigo não encontrado - RaiseUp" },
+      { name: "description", content: "O artigo solicitado não foi encontrado." },
+    ];
+  }
+  
+  return [
+    { title: `${data.artigo.titulo} - RaiseUp Blog` },
+    { name: "description", content: data.artigo.resumo },
+  ];
+};
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { slug } = params;
@@ -389,6 +404,7 @@ export default function BlogPost() {
           </div>
         </main>
       </div>
+      <Footer />
     </>
   );
 }

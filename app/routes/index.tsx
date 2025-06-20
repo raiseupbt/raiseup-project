@@ -1,3 +1,13 @@
+import type { MetaFunction } from "@remix-run/node";
+import Footer from "~/components/Footer";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "RaiseUp - Automação com IA Humanizada" },
+    { name: "description", content: "RaiseUp oferece soluções de automação empresarial com IA para atendimento 24/7, gestão de mídias sociais e otimização de processos. Automatize mantendo o toque humano." },
+  ];
+};
+
 export default function Index() {
   return (
     <>
@@ -961,6 +971,7 @@ export default function Index() {
           </div>
         </section>
       </main>
+      <Footer />
     </>
   );
 }
