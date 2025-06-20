@@ -204,10 +204,10 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="/politica-privacidade" style={{ color: '#fbbf24' }}>
+                  <Link to="/politica-privacidade" style={{ color: '#fbbf24' }}>
                     <i className="fas fa-shield-alt"></i>
                     Política de Privacidade
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
