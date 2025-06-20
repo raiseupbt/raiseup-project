@@ -286,9 +286,8 @@ export default function PoliticaPrivacidade() {
               entre em contato conosco:
             </p>
             <p>
-              <strong>E-mail:</strong> privacidade@raiseup.com.br<br />
-              <strong>Telefone:</strong> +55 (19) 98147-6177<br />
-              <strong>Endereço:</strong> Av. Anselmo Alves dos Santos, CEP: 38408-097, Bairro Santa Mônica, Uberlândia/MG
+              <strong>E-mail:</strong> contato@raiseup.com.br<br />
+              <strong>Endereço:</strong> Avenida Anselmo Alves dos Santos, 1076 loja 1, CEP: 38408-097, Bairro Santa Mônica, Uberlândia/MG
             </p>
           </div>
 

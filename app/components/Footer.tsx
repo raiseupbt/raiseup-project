@@ -143,7 +143,7 @@ export default function Footer() {
               <p>CNPJ: 51.769.510/0001-69</p>
               <p>
                 <i className="fas fa-map-marker-alt" style={{ color: '#0ea5e9', marginRight: '0.5rem' }}></i>
-                Av. Anselmo Alves dos Santos<br />
+                Avenida Anselmo Alves dos Santos, 1076 loja 1<br />
                 CEP: 38408-097<br />
                 Bairro Santa Mônica<br />
                 Uberlândia/MG

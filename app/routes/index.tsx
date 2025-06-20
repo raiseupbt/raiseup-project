@@ -31,6 +31,12 @@ export default function Index() {
             overflow-x: hidden;
           }
 
+          /* Garantir que o footer tenha a fonte correta */
+          .footer-container,
+          .footer-container * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+          }
+
           :root {
             --primary-bg: #0a0f1c;
             --secondary-bg: #1a202c;
