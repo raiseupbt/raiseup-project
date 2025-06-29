@@ -19,3 +19,8 @@ raiseup-analytics-key.json*
 # Logs
 *.log
 server.log
+
+# GitHub tokens and sensitive files
+github_pat_*.txt
+*.token
+*.key

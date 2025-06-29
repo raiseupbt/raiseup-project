@@ -705,6 +705,24 @@ export default function Admin() {
               <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Relatórios</div>
             </Link>
 
+            <Link to="/admin/formularios-sdr" className="dashboard-action-button" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              color: 'white',
+              padding: '1.5rem',
+              borderRadius: '16px',
+              textDecoration: 'none',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📋</div>
+              <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Formulários SDR</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Questionários preenchidos</div>
+            </Link>
+
             <Link to="/" className="dashboard-action-button" style={{
               display: 'flex',
               flexDirection: 'column',

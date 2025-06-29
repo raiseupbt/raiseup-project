@@ -38,3 +38,35 @@ export type ContatoData = {
   endereco_ip?: string;
   navegador?: string;
 };
+
+export type FormularioSDRData = {
+  nome: string;
+  email: string;
+  empresa?: string;
+  segmento: 'saude-clinicas' | 'beleza-estetica' | 'tecnologia-software' | 'consultoria-servicos' | 'varejo-ecommerce' | 'educacao' | 'outro';
+  porte_empresa: 'pequena' | 'media' | 'grande';
+  respostas: {
+    etapa1: {
+      segmento: string;
+      porte_empresa: string;
+      valor_medio: string;
+    };
+    etapa2: {
+      perfil_cliente: string;
+      motivacao_cliente: string;
+      processo_decisao: string;
+    };
+    etapa3: {
+      maior_desafio: string;
+      origem_clientes: string;
+      urgencia_necessidade: string;
+    };
+    etapa4: {
+      objetivo_sdr: string;
+      tom_comunicacao: string;
+    };
+  };
+  resposta_ia: string;
+  endereco_ip?: string;
+  navegador?: string;
+};
