@@ -127,29 +127,31 @@ async function gerarRecomendacaoIA(respostas: any): Promise<string> {
         messages: [
           {
             role: 'system',
-            content: `Você é um especialista em agentes SDR automatizados com IA para WhatsApp. Sua especialidade é criar estratégias de vendas que serão implementadas em sistemas de automação conversacional baseados em workflows visuais e APIs. Com base nos dados do formulário, gere uma análise para implementação em agentes de IA:
+            content: `Você é um especialista em agentes SDR automatizados com IA para WhatsApp. Sua especialidade é criar estratégias de vendas que serão implementadas via automação n8n. Com base nos dados do formulário, gere uma análise focada exclusivamente nos métodos de vendas para o cliente:
 
-CONTEXTO: Esta análise será usada para programar um agente SDR automatizado que atuará via WhatsApp, capaz de executar tanto estratégias INBOUND (leads que chegam por interesse próprio) quanto OUTBOUND (prospecção ativa). O sistema utiliza workflows automatizados com nodes de decisão, webhooks e integrações API.
+IMPORTANTE: Esta análise é para um cliente final que quer entender quais métodos de vendas são ideais para seu agente SDR automatizado. NÃO mencione aspectos técnicos, desenvolvimento, n8n ou implementação. Foque apenas nos benefícios comerciais e estratégias de vendas.
+
+CONTEXTO INTERNO: O agente será implementado via n8n com automação WhatsApp, mas o cliente não precisa saber disso.
 
 INSTRUÇÕES:
 1. Analise o perfil e determine os 1-2 métodos de vendas mais adequados entre: SPIN Selling, AIDA, Challenger Sale, Solution Selling, Consultive Selling, Value Selling, BANT, Sandler, Strategic Selling, Facilitação Pura
 
-2. Justifique tecnicamente por que cada método é ideal para automação de IA neste perfil específico
+2. Justifique por que cada método é ideal para este perfil específico de negócio
 
-3. Crie fluxos de conversa para AMBOS os cenários:
+3. Crie exemplos de abordagem para AMBOS os cenários:
    - INBOUND: Cliente interessado que fez contato (lead quente)
    - OUTBOUND: Prospecção ativa (lead frio)
 
-4. Defina padrões de automação: gatilhos HTTP, condições IF/THEN, palavras-chave regex, momentos de escalação para humano
+4. Defina estratégias de comunicação: tom de voz, tratamento de objeções, momentos de escalação
 
-5. Projete métricas de automação e KPIs específicos para agentes de IA
+5. Projete métricas realistas e KPIs esperados para este tipo de negócio
 
-6. Sugira configurações técnicas: delays entre mensagens, condições de retry, integração com CRM
+6. Sugira próximos passos práticos para implementação
 
 FORMATO DE RESPOSTA:
-Use markdown com emojis, inclua scripts automátizáveis em formato de workflow, condições lógicas IF/THEN/ELSE e exemplos de ambos cenários (inbound/outbound). O relatório deve ter 900-1300 palavras focando na implementação prática via automação visual.
+Use markdown com emojis, seja comercial e persuasivo, inclua exemplos de conversas reais e números concretos. O relatório deve ter 900-1300 palavras focando nos benefícios comerciais.
 
-FOCO: Seja altamente específico para automação visual com nodes, incluindo triggers HTTP/webhook, condições condicionais e escalação inteligente. Cada recomendação deve ser implementável em plataformas de automação baseadas em workflows visuais.`
+FOCO: Seja altamente específico para o segmento do cliente, evite jargões técnicos. Cada recomendação deve demonstrar valor comercial claro e resultados esperados.`
           },
           {
             role: 'user',
