@@ -47,7 +47,13 @@ export const action: ActionFunction = async ({ request }) => {
   
   if (acao === 'processar_final') {
     try {
-      const dados = JSON.parse(formData.get('dados_completos') as string);
+      const dadosCompletos = formData.get('dados_completos') as string;
+      
+      if (!dadosCompletos) {
+        throw new Error('Dados do formulário não foram recebidos corretamente');
+      }
+      
+      const dados = JSON.parse(dadosCompletos);
       
       // Enviar para API do OpenAI para gerar resposta
       const url = new URL('/api/sdr-form', request.url);
@@ -58,7 +64,22 @@ export const action: ActionFunction = async ({ request }) => {
       });
       
       if (!response.ok) {
-        throw new Error('Erro ao processar formulário');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Erro na API:', response.status, errorData);
+        
+        if (response.status === 400) {
+          // Erro de validação - dados inválidos
+          throw new Error(errorData.error || 'Dados do formulário inválidos. Verifique se todos os campos estão preenchidos corretamente.');
+        } else if (response.status === 503) {
+          // Erro de IA - repassar o erro específico
+          return json({ 
+            error: errorData.error || 'Serviço de IA temporariamente indisponível',
+            errorType: 'ia_error'
+          }, { status: 503 });
+        } else {
+          // Outros erros
+          throw new Error(errorData.error || 'Erro inesperado ao processar formulário');
+        }
       }
       
       const result = await response.json();
@@ -66,9 +87,16 @@ export const action: ActionFunction = async ({ request }) => {
       // Redirecionar para página de resultado
       return redirect(`/metodo-vendas-sdr/resultado/${result.id}`);
       
-    } catch (error) {
-      console.error('Erro ao processar formulário:', error);
-      return json({ error: 'Erro ao processar formulário. Tente novamente.' }, { status: 500 });
+    } catch (error: any) {
+      console.error('Erro ao processar formulário:', {
+        message: error.message,
+        stack: error.stack,
+        dados: JSON.stringify(dados, null, 2)
+      });
+      return json({ 
+        error: error.message || 'Erro ao processar formulário. Tente novamente.',
+        errorType: 'form_error'
+      }, { status: 500 });
     }
   }
   
@@ -89,6 +117,36 @@ export default function MetodoVendasSDR() {
   const navigation = useNavigation();
   const actionData = useActionData<typeof action>();
   const isSubmitting = navigation.state === 'submitting';
+  
+  // Função para serializar dados de forma segura
+  const serializarDados = (dados: FormData) => {
+    try {
+      const dadosLimpos = {
+        ...dados,
+        // Garantir que arrays estejam no formato correto
+        etapa3: {
+          ...dados.etapa3,
+          maior_desafio: Array.isArray(dados.etapa3.maior_desafio) ? dados.etapa3.maior_desafio : [],
+          origem_clientes: Array.isArray(dados.etapa3.origem_clientes) ? dados.etapa3.origem_clientes : []
+        },
+        etapa4: {
+          ...dados.etapa4,
+          objetivo_sdr: Array.isArray(dados.etapa4.objetivo_sdr) ? dados.etapa4.objetivo_sdr : [],
+          lgpd_consent: Boolean(dados.etapa4.lgpd_consent)
+        }
+      };
+      return JSON.stringify(dadosLimpos);
+    } catch (error) {
+      console.error('Erro ao serializar dados:', error);
+      return JSON.stringify({
+        dados_pessoais: dados.dados_pessoais,
+        etapa1: dados.etapa1,
+        etapa2: dados.etapa2,
+        etapa3: { maior_desafio: [], origem_clientes: [], urgencia_necessidade: '' },
+        etapa4: { objetivo_sdr: [], tom_comunicacao: '', lgpd_consent: false }
+      });
+    }
+  };
 
   const atualizarDados = (etapa: keyof FormData, campo: string, valor: string) => {
     setFormData(prev => {
@@ -321,7 +379,7 @@ export default function MetodoVendasSDR() {
           ) : (
             <Form method="post">
               <input type="hidden" name="acao" value="processar_final" />
-              <input type="hidden" name="dados_completos" value={JSON.stringify(formData)} />
+              <input type="hidden" name="dados_completos" value={serializarDados(formData)} />
               <button
                 type="submit"
                 disabled={!podeAvancar() || isSubmitting}
