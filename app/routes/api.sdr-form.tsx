@@ -20,6 +20,12 @@ export const action: ActionFunction = async ({ request }) => {
       return json({ error: 'Dados pessoais incompletos' }, { status: 400 });
     }
     
+    // Verificar consentimento LGPD
+    if (!etapa4?.lgpd_consent) {
+      console.error('❌ Consentimento LGPD não fornecido');
+      return json({ error: 'É necessário concordar com o armazenamento dos dados para prosseguir' }, { status: 400 });
+    }
+    
     // Criar objeto com todas as respostas
     const respostas = {
       etapa1,
@@ -32,8 +38,17 @@ export const action: ActionFunction = async ({ request }) => {
 
     // Gerar resposta personalizada com OpenAI
     console.log('🤖 Gerando resposta IA...');
-    const respostaIA = await gerarRecomendacaoIA(respostas);
-    console.log('✅ Resposta IA gerada, tamanho:', respostaIA.length);
+    let respostaIA;
+    try {
+      respostaIA = await gerarRecomendacaoIA(respostas);
+      console.log('✅ Resposta IA gerada, tamanho:', respostaIA.length);
+    } catch (iaError: any) {
+      console.error('❌ Erro na geração de IA:', iaError.message);
+      return json({ 
+        error: iaError.message || 'Erro no serviço de IA. Tente novamente mais tarde.',
+        errorType: 'ia_error'
+      }, { status: 503 }); // Service Unavailable
+    }
 
     // Preparar dados para inserção
     const dadosParaInserir = {
@@ -42,7 +57,10 @@ export const action: ActionFunction = async ({ request }) => {
       empresa: dados_pessoais.empresa || null,
       segmento: etapa1.segmento,
       porte_empresa: etapa1.porte_empresa,
-      respostas: respostas,
+      respostas: {
+        ...respostas,
+        lgpd_consent: etapa4.lgpd_consent // Store consent in respostas JSON
+      },
       resposta_ia: respostaIA,
       endereco_ip: request.headers.get('x-forwarded-for') || 
                    request.headers.get('x-real-ip') || 
@@ -88,20 +106,16 @@ export const action: ActionFunction = async ({ request }) => {
 async function gerarRecomendacaoIA(respostas: any): Promise<string> {
   const prompt = construirPrompt(respostas);
   
-  try {
-    // Verificar se temos a chave da OpenAI configurada
-    const openaiKey = process.env.OPENAI_API_KEY;
-    
-    if (!openaiKey) {
-      console.warn('OPENAI_API_KEY não configurada, usando resposta simulada');
-      try {
-        return gerarRespostaSimulada(respostas);
-      } catch (error) {
-        console.error('❌ Erro na resposta simulada:', error);
-        throw error;
-      }
-    }
+  // Verificar se temos a chave da OpenAI configurada
+  const openaiKey = process.env.OPENAI_API_KEY;
+  
+  if (!openaiKey) {
+    console.error('❌ OPENAI_API_KEY não configurada');
+    throw new Error('Serviço de IA temporariamente indisponível. Nossa equipe foi notificada e está trabalhando para resolver a questão. Tente novamente em alguns minutos.');
+  }
 
+  try {
+    console.log('🤖 Chamando OpenAI API...');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -120,28 +134,56 @@ IMPORTANTE:
 - Use exemplos concretos de scripts e abordagens
 - Organize a resposta em seções claras
 - Foque em métodos comprovados para WhatsApp Business
-- Inclua justificativas técnicas para cada recomendação`
+- Inclua justificativas técnicas para cada recomendação
+- Use markdown para formatação (# ## ### para títulos)
+- Mantenha um tom profissional mas acessível`
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        max_tokens: 2000,
+        max_tokens: 2500,
         temperature: 0.7,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ OpenAI API error:', response.status, errorData);
+      
+      if (response.status === 429) {
+        throw new Error('Nosso serviço de IA está com muitas solicitações no momento. Aguarde alguns minutos e tente novamente.');
+      } else if (response.status === 401) {
+        throw new Error('Erro de autenticação com o serviço de IA. Nossa equipe foi notificada.');
+      } else if (response.status >= 500) {
+        throw new Error('O serviço de IA está temporariamente indisponível. Tente novamente em alguns minutos.');
+      } else {
+        throw new Error('Erro temporário no serviço de IA. Tente novamente em alguns instantes.');
+      }
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content || gerarRespostaSimulada(respostas);
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('❌ Resposta inválida da OpenAI:', data);
+      throw new Error('Resposta inválida do serviço de IA. Tente novamente.');
+    }
 
-  } catch (error) {
-    console.error('Erro ao chamar OpenAI:', error);
-    return gerarRespostaSimulada(respostas);
+    const content = data.choices[0].message.content;
+    console.log('✅ Resposta OpenAI recebida com sucesso');
+    return content;
+
+  } catch (error: any) {
+    console.error('❌ Erro ao chamar OpenAI:', error);
+    
+    // Se é um erro que já tem uma mensagem amigável, usar ela
+    if (error.message && error.message.includes('serviço de IA')) {
+      throw error;
+    }
+    
+    // Para outros erros, usar mensagem genérica
+    throw new Error('Estamos enfrentando instabilidade em nosso serviço de IA. Tente novamente em alguns minutos ou entre em contato conosco se o problema persistir.');
   }
 }
 
@@ -181,127 +223,6 @@ Forneça uma análise completa com:
 Seja específico, prático e use exemplos reais de mensagens.`;
 }
 
-function gerarRespostaSimulada(respostas: any): string {
-  const { etapa1, etapa2, etapa3, etapa4 } = respostas;
-  
-  // Função para formatar arrays em strings legíveis
-  const formatarArray = (arr: any) => {
-    if (!arr) return 'não especificado';
-    if (typeof arr === 'string') return arr.replace('-', ' ');
-    if (Array.isArray(arr)) return arr.map(item => item.replace('-', ' ')).join(', ');
-    return String(arr).replace('-', ' ');
-  };
-  
-  // Função para obter primeiro item de array ou string
-  const obterPrimeiro = (value: any) => {
-    if (!value) return 'não especificado';
-    if (Array.isArray(value)) return value[0] || 'não especificado';
-    return value;
-  };
-  
-  // Lógica básica para gerar recomendações baseadas nas respostas
-  let metodoRecomendado = '';
-  let justificativa = '';
-  
-  const primeiroObjetivo = obterPrimeiro(etapa4.objetivo_sdr);
-  const primeiroDesafio = obterPrimeiro(etapa3.maior_desafio);
-  
-  // Determinar método principal baseado no perfil
-  if (etapa2.perfil_cliente === 'sabem-o-que-querem' && primeiroObjetivo === 'agendar-consultas') {
-    metodoRecomendado = 'Método Direto de Agendamento';
-    justificativa = 'Seus clientes já sabem o que querem, então o foco deve ser agilizar o agendamento.';
-  } else if (etapa2.perfil_cliente === 'precisam-educacao' && primeiroDesafio === 'educar-produto') {
-    metodoRecomendado = 'Método Educativo Progressivo';
-    justificativa = 'Clientes precisam ser educados, então o SDR deve nutrir com conteúdo educativo.';
-  } else if (primeiroDesafio === 'qualificar-leads') {
-    metodoRecomendado = 'Método de Qualificação BANT';
-    justificativa = 'Foco na qualificação é essencial para otimizar o tempo de vendas.';
-  } else {
-    metodoRecomendado = 'Método Consultivo Adaptativo';
-    justificativa = 'Abordagem flexível que se adapta ao perfil específico do cliente.';
-  }
-
-  return `# 🎯 RECOMENDAÇÕES PERSONALIZADAS PARA SEU AGENTE SDR
-
-## 1. MÉTODO PRINCIPAL RECOMENDADO
-
-**${metodoRecomendado}**
-
-${justificativa}
-
-**Por que esta abordagem funciona para seu perfil:**
-- Segmento ${formatarArray(etapa1.segmento)} normalmente responde bem a ${formatarArray(etapa4.tom_comunicacao)}
-- Clientes que ${formatarArray(etapa2.perfil_cliente)} precisam de abordagem específica
-- Considerando que os principais desafios são: ${formatarArray(etapa3.maior_desafio)}
-
-## 2. MÉTODOS COMPLEMENTARES
-
-### Método A: Approach por Valor
-- Foque no ROI e benefícios tangíveis
-- Use cases de sucesso do seu segmento
-- Destaque a urgência quando apropriado
-
-### Método B: Social Proof
-- Testimoniais de clientes similares
-- Casos de estudo específicos do segmento
-- Estatísticas e resultados comprovados
-
-## 3. ESTRUTURA DE ABORDAGEM SUGERIDA
-
-### Primeira Mensagem (Abertura):
-"Olá! Sou [Nome] da [Empresa]. Ajudo empresas do setor ${etapa1.segmento.replace('-', '/')} a [benefício específico]. Posso te mostrar como [resultado específico] em apenas 15 minutos?"
-
-### Segunda Mensagem (Qualificação):
-"Para personalizar melhor nossa conversa, você atual​mente [desafio identificado no formulário]?"
-
-### Terceira Mensagem (Agendamento):
-"Baseado no que você me contou, tenho algumas estratégias que podem te ajudar. Que tal conversarmos [dia/horário] para eu te mostrar?"
-
-## 4. SCRIPTS ESPECÍFICOS PARA WHATSAPP
-
-### Para Clientes que ${formatarArray(etapa2.perfil_cliente)}:
-"Entendo que você ${formatarArray(etapa2.motivacao_cliente)}. Temos uma solução específica para isso. Posso te mostrar como funciona?"
-
-### Para Tratar Objeções de ${formatarArray(etapa3.maior_desafio)}:
-"Entendo sua preocupação. Na verdade, isso é exatamente o que nossos clientes mais relatam. Deixe-me te mostrar como [empresa similar] resolveu isso..."
-
-## 5. TRATAMENTO DE OBJEÇÕES PRINCIPAIS
-
-### "Não tenho tempo agora"
-"Entendo perfeitamente. Por isso mesmo nossa conversa é rápida - apenas 15 minutos. Quando seria melhor para você: manhã ou tarde?"
-
-### "Já temos uma solução"
-"Que bom! Como está funcionando? Sempre gosto de entender o que funciona no mercado. Posso compartilhar algumas otimizações que têm dado resultado?"
-
-### "Preciso pensar"
-"Claro! Para te ajudar a pensar melhor, posso te enviar um material específico sobre ${etapa1.segmento}. Vai te dar uma visão mais clara."
-
-## 6. MÉTRICAS DE ACOMPANHAMENTO
-
-### KPIs Principais:
-- Taxa de resposta da primeira mensagem
-- Taxa de agendamento
-- Taxa de comparecimento 
-- Tempo médio de resposta
-
-### Metas Sugeridas:
-- Taxa de resposta: 25-35%
-- Taxa de agendamento: 15-25%
-- Taxa de comparecimento: 70-80%
-
-## 7. PRÓXIMOS PASSOS
-
-1. **Teste os scripts** por 1 semana
-2. **Analise as métricas** e ajuste conforme necessário
-3. **Documente as objeções** mais comuns
-4. **Otimize baseado nos resultados**
-
----
-
-**💡 DICA EXTRA:** Considerando que seus clientes vêm principalmente de ${formatarArray(etapa3.origem_clientes)}, certifique-se de mencionar isso na abordagem para criar conexão imediata.
-
-**🚀 Quer implementar essas estratégias com automação completa? Agende uma consulta gratuita com nossa equipe!**`;
-}
 
 // Não exportar como default para evitar ser tratado como página
 export default null;

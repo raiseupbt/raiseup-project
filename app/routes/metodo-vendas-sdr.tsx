@@ -37,6 +37,7 @@ interface FormData {
   etapa4: {
     objetivo_sdr: string[];
     tom_comunicacao: string;
+    lgpd_consent: boolean;
   };
 }
 
@@ -82,7 +83,7 @@ export default function MetodoVendasSDR() {
     etapa1: { segmento: '', porte_empresa: '', valor_medio: '' },
     etapa2: { perfil_cliente: '', motivacao_cliente: '', processo_decisao: '' },
     etapa3: { maior_desafio: [], origem_clientes: [], urgencia_necessidade: '' },
-    etapa4: { objetivo_sdr: [], tom_comunicacao: '' }
+    etapa4: { objetivo_sdr: [], tom_comunicacao: '', lgpd_consent: false }
   });
   
   const navigation = useNavigation();
@@ -91,15 +92,19 @@ export default function MetodoVendasSDR() {
 
   const atualizarDados = (etapa: keyof FormData, campo: string, valor: string) => {
     setFormData(prev => {
-      let novoValor = valor;
+      let novoValor: any = valor;
       
       // Se o valor é um JSON string de array, parse para array
-      if (valor.startsWith('[') && valor.endsWith(']')) {
+      if (typeof valor === 'string' && valor.startsWith('[') && valor.endsWith(']')) {
         try {
           novoValor = JSON.parse(valor);
         } catch (e) {
           novoValor = valor;
         }
+      }
+      // Se o valor é um boolean string, converter para boolean
+      else if (valor === 'true' || valor === 'false') {
+        novoValor = valor === 'true';
       }
       
       return {
@@ -123,7 +128,7 @@ export default function MetodoVendasSDR() {
       case 3:
         return formData.etapa3.maior_desafio.length > 0 && formData.etapa3.origem_clientes.length > 0 && formData.etapa3.urgencia_necessidade;
       case 4:
-        return formData.etapa4.objetivo_sdr.length > 0 && formData.etapa4.tom_comunicacao;
+        return formData.etapa4.objetivo_sdr.length > 0 && formData.etapa4.tom_comunicacao && formData.etapa4.lgpd_consent;
       default:
         return false;
     }
@@ -340,15 +345,47 @@ export default function MetodoVendasSDR() {
 
         {actionData?.error && (
           <div style={{
-            marginTop: '1rem',
-            padding: '1rem',
-            background: 'rgba(220, 38, 38, 0.1)',
-            border: '1px solid rgba(220, 38, 38, 0.3)',
-            borderRadius: '8px',
-            color: '#fca5a5',
-            fontSize: '0.9rem'
+            marginTop: '1.5rem',
+            padding: '1.5rem',
+            background: actionData.errorType === 'ia_error' 
+              ? 'rgba(245, 158, 11, 0.1)' 
+              : 'rgba(220, 38, 38, 0.1)',
+            border: `1px solid ${actionData.errorType === 'ia_error' 
+              ? 'rgba(245, 158, 11, 0.3)' 
+              : 'rgba(220, 38, 38, 0.3)'}`,
+            borderRadius: '12px',
+            color: actionData.errorType === 'ia_error' 
+              ? '#fbbf24' 
+              : '#fca5a5',
+            fontSize: '0.95rem',
+            lineHeight: '1.5'
           }}>
-            {actionData.error}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '1.25rem' }}>
+                {actionData.errorType === 'ia_error' ? '⚡' : '❌'}
+              </span>
+              <strong>
+                {actionData.errorType === 'ia_error' 
+                  ? 'Serviço de IA Temporariamente Indisponível' 
+                  : 'Erro no Formulário'}
+              </strong>
+            </div>
+            <div>
+              {actionData.error}
+            </div>
+            {actionData.errorType === 'ia_error' && (
+              <div style={{ 
+                marginTop: '1rem', 
+                padding: '0.75rem', 
+                background: 'rgba(255, 255, 255, 0.05)', 
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                color: '#cbd5e1'
+              }}>
+                💡 <strong>Dica:</strong> Nosso sistema de IA gera recomendações 100% personalizadas baseadas nas suas respostas. 
+                Aguarde alguns minutos e tente novamente para receber sua análise exclusiva.
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -679,6 +716,42 @@ function Etapa4({ dados, onChange }: { dados: any, onChange: (campo: string, val
           valor={dados.tom_comunicacao}
           onChange={(valor) => onChange('tom_comunicacao', valor)}
         />
+
+        {/* LGPD Consent Checkbox */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.75rem',
+            cursor: 'pointer',
+            color: '#ffffff'
+          }}>
+            <input
+              type="checkbox"
+              checked={dados.lgpd_consent || false}
+              onChange={(e) => onChange('lgpd_consent', e.target.checked.toString())}
+              style={{
+                width: '18px',
+                height: '18px',
+                marginTop: '2px',
+                accentColor: '#10b981'
+              }}
+            />
+            <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+              <div style={{ marginBottom: '0.5rem' }}>
+                Concordo com o <strong>armazenamento e processamento dos meus dados</strong> para receber as recomendações personalizadas.
+              </div>
+              <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
+                Seus dados serão utilizados exclusivamente para gerar suas recomendações de SDR e poderão ser usados para contato relacionado aos nossos serviços. Você pode solicitar a remoção dos seus dados a qualquer momento entrando em contato conosco.
+              </div>
+            </div>
+          </label>
+        </div>
       </div>
     </div>
   );
