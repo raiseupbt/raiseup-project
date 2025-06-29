@@ -132,12 +132,16 @@ export default function MetodoVendasSDR() {
   const proximaEtapa = () => {
     if (podeAvancar() && etapaAtual < 4) {
       setEtapaAtual(etapaAtual + 1);
+      // Scroll para o topo suavemente
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const etapaAnterior = () => {
     if (etapaAtual > 0) {
       setEtapaAtual(etapaAtual - 1);
+      // Scroll para o topo suavemente
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
