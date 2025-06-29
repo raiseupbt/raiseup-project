@@ -127,16 +127,25 @@ async function gerarRecomendacaoIA(respostas: any): Promise<string> {
         messages: [
           {
             role: 'system',
-            content: `Você é um especialista em vendas e automação comercial. Sua tarefa é analisar as respostas de um questionário sobre SDR (Sales Development Representative) e fornecer recomendações personalizadas e práticas.
+            content: `Você é um especialista em agentes SDR conversacionais para WhatsApp. Com base nos dados do formulário preenchido pelo cliente, gere uma análise personalizada seguindo esta estrutura:
 
-IMPORTANTE:
-- Seja específico e prático nas recomendações
-- Use exemplos concretos de scripts e abordagens
-- Organize a resposta em seções claras
-- Foque em métodos comprovados para WhatsApp Business
-- Inclua justificativas técnicas para cada recomendação
-- Use markdown para formatação (# ## ### para títulos)
-- Mantenha um tom profissional mas acessível`
+INSTRUÇÕES:
+1. Analise o perfil e determine os 1-2 métodos de vendas mais adequados entre: SPIN Selling, AIDA, Challenger Sale, Solution Selling, Consultive Selling, Value Selling, BANT, Sandler, Strategic Selling, Facilitação Pura
+
+2. Justifique tecnicamente por que cada método é ideal para este perfil específico
+
+3. Crie um fluxo de conversa personalizado para WhatsApp com exemplos de mensagens
+
+4. Defina tom de voz, palavras-chave e tratamento de objeções específicas do segmento
+
+5. Projete métricas realistas baseadas no tipo de negócio
+
+6. Sugira próximos passos práticos
+
+FORMATO DE RESPOSTA:
+Use markdown com emojis, seja específico e técnico, mas mantenha linguagem acessível. Inclua exemplos práticos de conversas e números concretos. O relatório deve ter 800-1200 palavras e demonstrar expertise técnica.
+
+FOCO: Seja altamente específico para o segmento informado, evite generalizações. Cada recomendação deve ser justificada com base nos dados fornecidos.`
           },
           {
             role: 'user',
@@ -190,37 +199,20 @@ IMPORTANTE:
 function construirPrompt(respostas: any): string {
   const { etapa1, etapa2, etapa3, etapa4 } = respostas;
   
-  return `Analise este perfil de empresa e forneça recomendações personalizadas para um agente SDR via WhatsApp:
-
-**PERFIL DA EMPRESA:**
+  return `DADOS DO CLIENTE:
 - Segmento: ${etapa1.segmento}
 - Porte: ${etapa1.porte_empresa}
 - Valor médio: ${etapa1.valor_medio}
-
-**PERFIL DOS CLIENTES:**
-- Comportamento: ${etapa2.perfil_cliente}
-- Motivação: ${etapa2.motivacao_cliente}
+- Comportamento do cliente: ${etapa2.perfil_cliente}
+- Motivação principal: ${etapa2.motivacao_cliente}
 - Processo de decisão: ${etapa2.processo_decisao}
-
-**CONTEXTO DE VENDAS:**
 - Maior desafio: ${etapa3.maior_desafio}
-- Origem dos clientes: ${etapa3.origem_clientes}
+- Origem dos leads: ${etapa3.origem_clientes}
 - Urgência: ${etapa3.urgencia_necessidade}
-
-**OBJETIVOS:**
 - Objetivo do SDR: ${etapa4.objetivo_sdr}
 - Tom desejado: ${etapa4.tom_comunicacao}
 
-Forneça uma análise completa com:
-
-1. **MÉTODO PRINCIPAL RECOMENDADO** (e justificativa)
-2. **MÉTODOS COMPLEMENTARES** (2 opções adicionais)
-3. **ESTRUTURA DE ABORDAGEM** (fluxo de conversa detalhado)
-4. **SCRIPTS SUGERIDOS** (exemplos práticos para WhatsApp)
-5. **TRATAMENTO DE OBJEÇÕES** (principais objeções e como lidar)
-6. **MÉTRICAS DE ACOMPANHAMENTO** (KPIs importantes)
-
-Seja específico, prático e use exemplos reais de mensagens.`;
+Analise este perfil específico e gere uma estratégia completa de SDR para WhatsApp.`;
 }
 
 
