@@ -769,44 +769,43 @@ function CheckboxGroup({ label, opcoes, valores, onChange, maxSelecoes = 3 }: {
         Selecione até {maxSelecoes} opções
       </p>
       <div style={{ display: 'grid', gap: '0.75rem' }}>
-        {opcoes.map((opcao) => (
-          <div
-            key={opcao.value}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '1rem',
-              background: valores.includes(opcao.value) ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-              border: `1px solid ${valores.includes(opcao.value) ? '#10b981' : 'rgba(255, 255, 255, 0.1)'}`,
-              borderRadius: '8px',
-              cursor: valores.length >= maxSelecoes && !valores.includes(opcao.value) ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-              color: '#ffffff',
-              opacity: valores.length >= maxSelecoes && !valores.includes(opcao.value) ? 0.5 : 1
-            }}
-            onClick={() => {
-              if (valores.length < maxSelecoes || valores.includes(opcao.value)) {
-                toggleValor(opcao.value);
-              }
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={valores.includes(opcao.value)}
-              onChange={(e) => {
-                e.stopPropagation();
-                toggleValor(opcao.value);
-              }}
-              disabled={valores.length >= maxSelecoes && !valores.includes(opcao.value)}
+        {opcoes.map((opcao) => {
+          const isDisabled = valores.length >= maxSelecoes && !valores.includes(opcao.value);
+          
+          return (
+            <label
+              key={opcao.value}
               style={{
-                marginRight: '0.75rem',
-                accentColor: '#10b981',
-                pointerEvents: 'none'
+                display: 'flex',
+                alignItems: 'center',
+                padding: '1rem',
+                background: valores.includes(opcao.value) ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: `1px solid ${valores.includes(opcao.value) ? '#10b981' : 'rgba(255, 255, 255, 0.1)'}`,
+                borderRadius: '8px',
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                color: '#ffffff',
+                opacity: isDisabled ? 0.5 : 1
               }}
-            />
-            <span style={{ fontSize: '1rem', userSelect: 'none' }}>{opcao.label}</span>
-          </div>
-        ))}
+            >
+              <input
+                type="checkbox"
+                checked={valores.includes(opcao.value)}
+                onChange={() => {
+                  if (!isDisabled) {
+                    toggleValor(opcao.value);
+                  }
+                }}
+                disabled={isDisabled}
+                style={{
+                  marginRight: '0.75rem',
+                  accentColor: '#10b981'
+                }}
+              />
+              <span style={{ fontSize: '1rem', userSelect: 'none' }}>{opcao.label}</span>
+            </label>
+          );
+        })}
       </div>
     </div>
   );

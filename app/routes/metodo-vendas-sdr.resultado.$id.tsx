@@ -395,8 +395,18 @@ function ResumoEtapa({ titulo, dados, labels }: {
   dados: any;
   labels: Record<string, string>;
 }) {
-  const formatarValor = (valor: string) => {
-    return valor
+  const formatarValor = (valor: any) => {
+    if (!valor) return 'Não especificado';
+    
+    // Se for array, formatar cada item e juntar com vírgula
+    if (Array.isArray(valor)) {
+      return valor
+        .map(item => String(item).split('-').map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1)).join(' '))
+        .join(', ');
+    }
+    
+    // Se for string, formatar normalmente
+    return String(valor)
       .split('-')
       .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1))
       .join(' ');
