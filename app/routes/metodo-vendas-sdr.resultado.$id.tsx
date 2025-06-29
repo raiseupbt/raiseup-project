@@ -60,6 +60,9 @@ export const loader: LoaderFunction = async ({ params }) => {
 export default function ResultadoSDR() {
   const { usuario, respostas, recomendacoes, criadoEm } = useLoaderData<LoaderData>();
   
+  // URL atual para compartilhamento
+  const urlAtual = typeof window !== 'undefined' ? window.location.href : '';
+  
   // Converter markdown básico para HTML
   const formatarConteudo = (texto: string) => {
     // Primeiro, dividir em linhas para processar linha por linha
@@ -206,22 +209,22 @@ export default function ResultadoSDR() {
                   fontSize: '1.75rem',
                   fontWeight: 'bold',
                   color: '#10b981',
-                  marginBottom: '1rem',
-                  marginTop: '2rem'
+                  marginBottom: '1.5rem',
+                  marginTop: '1rem'
                 },
                 '& h2': {
                   fontSize: '1.4rem',
                   fontWeight: 'bold',  
                   color: '#34d399',
-                  marginBottom: '0.75rem',
-                  marginTop: '1.5rem'
+                  marginBottom: '1.25rem',
+                  marginTop: '0.75rem'
                 },
                 '& h3': {
                   fontSize: '1.2rem',
                   fontWeight: '600',
                   color: '#ffffff',
-                  marginBottom: '0.5rem',
-                  marginTop: '1rem'
+                  marginBottom: '1rem',
+                  marginTop: '0.5rem'
                 },
                 '& strong': {
                   color: '#10b981',
@@ -359,6 +362,91 @@ export default function ResultadoSDR() {
           </div>
         </div>
 
+        {/* Botão Compartilhar */}
+        <div style={{
+          background: 'rgba(26, 32, 44, 0.95)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '24px',
+          padding: '2rem',
+          marginTop: '2rem',
+          textAlign: 'center',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+        }}>
+          <h3 style={{
+            fontSize: '1.25rem',
+            fontWeight: 'bold',
+            color: '#ffffff',
+            marginBottom: '1rem'
+          }}>
+            📤 Compartilhe Seus Resultados
+          </h3>
+          
+          <p style={{
+            color: '#cbd5e1',
+            marginBottom: '1.5rem',
+            fontSize: '1rem'
+          }}>
+            Envie este link personalizado para colegas ou outros interessados
+          </p>
+          
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => {
+                const texto = `🎯 Acabei de receber minha análise personalizada de métodos SDR! Confira as recomendações específicas para ${usuario.empresa || 'minha empresa'}: ${urlAtual}`;
+                const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+                window.open(urlWhatsApp, '_blank');
+              }}
+              style={{
+                display: 'inline-block',
+                padding: '0.75rem 2rem',
+                background: '#25D366',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontSize: '1rem'
+              }}
+            >
+              📱 Compartilhar no WhatsApp
+            </button>
+            
+            <button
+              onClick={() => {
+                if (navigator.clipboard) {
+                  navigator.clipboard.writeText(urlAtual).then(() => {
+                    alert('Link copiado para a área de transferência!');
+                  });
+                } else {
+                  // Fallback para navegadores mais antigos
+                  const textArea = document.createElement('textarea');
+                  textArea.value = urlAtual;
+                  document.body.appendChild(textArea);
+                  textArea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textArea);
+                  alert('Link copiado para a área de transferência!');
+                }
+              }}
+              style={{
+                display: 'inline-block',
+                padding: '0.75rem 2rem',
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: '#ffffff',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontSize: '1rem'
+              }}
+            >
+              🔗 Copiar Link
+            </button>
+          </div>
+        </div>
+
         {/* Footer Navigation */}
         <div style={{
           display: 'flex',
@@ -422,18 +510,87 @@ function ResumoEtapa({ titulo, dados, labels }: {
   const formatarValor = (valor: any) => {
     if (!valor) return 'Não especificado';
     
-    // Se for array, formatar cada item e juntar com vírgula
+    // Mapeamento específico para valores conhecidos
+    const mapeamento: Record<string, string> = {
+      // Segmentos
+      'saude-clinicas': 'Saúde/Clínicas',
+      'beleza-estetica': 'Beleza/Estética',
+      'tecnologia-software': 'Tecnologia/Software',
+      'consultoria-servicos': 'Consultoria/Serviços',
+      'varejo-ecommerce': 'Varejo/E-commerce',
+      'educacao': 'Educação',
+      'outro': 'Outro',
+      
+      // Porte da empresa
+      'pequena': 'Pequena (até 10 funcionários)',
+      'media': 'Média (11-100 funcionários)',
+      'grande': 'Grande (100+ funcionários)',
+      
+      // Valores médios
+      'ate-500': 'Até R$ 500',
+      '501-2000': 'R$ 501 - R$ 2.000',
+      '2001-10000': 'R$ 2.001 - R$ 10.000',
+      'acima-10000': 'Acima de R$ 10.000',
+      
+      // Perfil do cliente
+      'sabem-o-que-querem': 'Já sabem o que querem',
+      'pesquisando-opcoes': 'Estão pesquisando opções',
+      'precisam-educacao': 'Precisam ser educados sobre a necessidade',
+      'tem-resistencia': 'Têm resistência/objeções',
+      
+      // Motivação
+      'resolver-urgente': 'Resolver problema urgente',
+      'melhorar-atual': 'Melhorar situação atual',
+      'acompanhar-concorrencia': 'Acompanhar concorrência',
+      'aproveitar-oportunidade': 'Aproveitar oportunidade',
+      
+      // Processo de decisão
+      'individual': 'Individual (cliente decide sozinho)',
+      'familiar': 'Familiar (cônjuge/família)',
+      'empresarial': 'Empresarial (múltiplos decisores)',
+      
+      // Desafios
+      'qualificar-leads': 'Qualificar leads',
+      'converter-visitantes': 'Converter visitantes em interessados',
+      'vencer-objecoes': 'Vencer objeções de preço',
+      'agendar-reunioes': 'Agendar reuniões/consultas',
+      'educar-produto': 'Educar sobre o produto',
+      
+      // Origem dos clientes
+      'google-seo': 'Google/SEO',
+      'redes-sociais': 'Redes sociais',
+      'indicacoes': 'Indicações',
+      'anuncios-pagos': 'Anúncios pagos',
+      'prospeccao-ativa': 'Prospecção ativa',
+      
+      // Urgência
+      'emergencial': 'Emergencial (precisa resolver hoje)',
+      'planejada': 'Planejada (tem tempo para decidir)',
+      'oportunidade': 'Oportunidade (pode esperar promoção)',
+      
+      // Objetivos SDR
+      'agendar-consultas': 'Agendar consultas/reuniões',
+      'qualificar-passar': 'Qualificar e passar para vendedor',
+      'fechar-vendas': 'Fechar vendas diretamente',
+      'educar-nutrir': 'Educar e nutrir leads',
+      
+      // Tom de comunicação
+      'profissional-tecnico': 'Profissional e técnico',
+      'amigavel-proximo': 'Amigável e próximo',
+      'consultivo-educativo': 'Consultivo e educativo',
+      'direto-objetivo': 'Direto e objetivo'
+    };
+    
+    // Se for array, formatar cada item
     if (Array.isArray(valor)) {
       return valor
-        .map(item => String(item).split('-').map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1)).join(' '))
+        .map(item => mapeamento[String(item)] || String(item))
         .join(', ');
     }
     
-    // Se for string, formatar normalmente
-    return String(valor)
-      .split('-')
-      .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1))
-      .join(' ');
+    // Se for string, usar mapeamento ou fallback
+    const valorString = String(valor);
+    return mapeamento[valorString] || valorString;
   };
 
   return (
