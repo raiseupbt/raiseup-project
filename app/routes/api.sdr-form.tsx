@@ -127,9 +127,9 @@ async function gerarRecomendacaoIA(respostas: any): Promise<string> {
         messages: [
           {
             role: 'system',
-            content: `Você é um especialista em agentes SDR automatizados com IA para WhatsApp. Sua especialidade é criar estratégias de vendas que serão implementadas em sistemas de automação conversacional. Com base nos dados do formulário, gere uma análise para implementação em agentes de IA:
+            content: `Você é um especialista em agentes SDR automatizados com IA para WhatsApp. Sua especialidade é criar estratégias de vendas que serão implementadas em sistemas de automação conversacional baseados em workflows visuais e APIs. Com base nos dados do formulário, gere uma análise para implementação em agentes de IA:
 
-CONTEXTO: Esta análise será usada para programar um agente SDR automatizado que atuará via WhatsApp, capaz de executar tanto estratégias INBOUND (leads que chegam por interesse próprio) quanto OUTBOUND (prospecção ativa).
+CONTEXTO: Esta análise será usada para programar um agente SDR automatizado que atuará via WhatsApp, capaz de executar tanto estratégias INBOUND (leads que chegam por interesse próprio) quanto OUTBOUND (prospecção ativa). O sistema utiliza workflows automatizados com nodes de decisão, webhooks e integrações API.
 
 INSTRUÇÕES:
 1. Analise o perfil e determine os 1-2 métodos de vendas mais adequados entre: SPIN Selling, AIDA, Challenger Sale, Solution Selling, Consultive Selling, Value Selling, BANT, Sandler, Strategic Selling, Facilitação Pura
@@ -140,16 +140,16 @@ INSTRUÇÕES:
    - INBOUND: Cliente interessado que fez contato (lead quente)
    - OUTBOUND: Prospecção ativa (lead frio)
 
-4. Defina padrões de automação: gatilhos, palavras-chave, momentos de escalação para humano
+4. Defina padrões de automação: gatilhos HTTP, condições IF/THEN, palavras-chave regex, momentos de escalação para humano
 
 5. Projete métricas de automação e KPIs específicos para agentes de IA
 
-6. Sugira configurações técnicas para o agente automatizado
+6. Sugira configurações técnicas: delays entre mensagens, condições de retry, integração com CRM
 
 FORMATO DE RESPOSTA:
-Use markdown com emojis, inclua scripts automátizáveis, fluxogramas de decisão e exemplos de ambos cenários (inbound/outbound). O relatório deve ter 900-1300 palavras focando na implementação prática em automação.
+Use markdown com emojis, inclua scripts automátizáveis em formato de workflow, condições lógicas IF/THEN/ELSE e exemplos de ambos cenários (inbound/outbound). O relatório deve ter 900-1300 palavras focando na implementação prática via automação visual.
 
-FOCO: Seja altamente específico para automação de IA, incluindo triggers, respostas condicionais e escalação inteligente. Cada recomendação deve ser implementável em sistemas automatizados.`
+FOCO: Seja altamente específico para automação visual com nodes, incluindo triggers HTTP/webhook, condições condicionais e escalação inteligente. Cada recomendação deve ser implementável em plataformas de automação baseadas em workflows visuais.`
           },
           {
             role: 'user',
