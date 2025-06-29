@@ -62,13 +62,37 @@ export default function ResultadoSDR() {
   
   // Converter markdown básico para HTML
   const formatarConteudo = (texto: string) => {
-    return texto
-      .replace(/# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/## (.*$)/gm, '<h2>$1</h2>')
-      .replace(/### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/\n/g, '<br />');
+    // Primeiro, dividir em linhas para processar linha por linha
+    const linhas = texto.split('\n');
+    
+    const linhasProcessadas = linhas.map(linha => {
+      // Headers
+      if (linha.match(/^### /)) {
+        return `<h3>${linha.replace(/^### /, '')}</h3>`;
+      }
+      if (linha.match(/^## /)) {
+        return `<h2>${linha.replace(/^## /, '')}</h2>`;
+      }
+      if (linha.match(/^# /)) {
+        return `<h1>${linha.replace(/^# /, '')}</h1>`;
+      }
+      
+      // Remover linhas que são só hashtags
+      if (linha.match(/^#+\s*$/)) {
+        return '';
+      }
+      
+      // Processar bold e italic na linha
+      linha = linha.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      linha = linha.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      
+      return linha;
+    });
+    
+    // Juntar novamente com <br />
+    return linhasProcessadas
+      .filter(linha => linha !== '') // Remove linhas vazias
+      .join('<br />');
   };
 
   const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
