@@ -30,12 +30,12 @@ interface FormData {
     processo_decisao: string;
   };
   etapa3: {
-    maior_desafio: string;
-    origem_clientes: string;
+    maior_desafio: string[];
+    origem_clientes: string[];
     urgencia_necessidade: string;
   };
   etapa4: {
-    objetivo_sdr: string;
+    objetivo_sdr: string[];
     tom_comunicacao: string;
   };
 }
@@ -49,7 +49,8 @@ export const action: ActionFunction = async ({ request }) => {
       const dados = JSON.parse(formData.get('dados_completos') as string);
       
       // Enviar para API do OpenAI para gerar resposta
-      const response = await fetch('/api/sdr-form', {
+      const url = new URL('/api/sdr-form', request.url);
+      const response = await fetch(url.toString(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)
@@ -80,8 +81,8 @@ export default function MetodoVendasSDR() {
     dados_pessoais: { nome: '', email: '', empresa: '' },
     etapa1: { segmento: '', porte_empresa: '', valor_medio: '' },
     etapa2: { perfil_cliente: '', motivacao_cliente: '', processo_decisao: '' },
-    etapa3: { maior_desafio: '', origem_clientes: '', urgencia_necessidade: '' },
-    etapa4: { objetivo_sdr: '', tom_comunicacao: '' }
+    etapa3: { maior_desafio: [], origem_clientes: [], urgencia_necessidade: '' },
+    etapa4: { objetivo_sdr: [], tom_comunicacao: '' }
   });
   
   const navigation = useNavigation();
@@ -89,13 +90,26 @@ export default function MetodoVendasSDR() {
   const isSubmitting = navigation.state === 'submitting';
 
   const atualizarDados = (etapa: keyof FormData, campo: string, valor: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [etapa]: {
-        ...(prev[etapa] as any),
-        [campo]: valor
+    setFormData(prev => {
+      let novoValor = valor;
+      
+      // Se o valor é um JSON string de array, parse para array
+      if (valor.startsWith('[') && valor.endsWith(']')) {
+        try {
+          novoValor = JSON.parse(valor);
+        } catch (e) {
+          novoValor = valor;
+        }
       }
-    }));
+      
+      return {
+        ...prev,
+        [etapa]: {
+          ...(prev[etapa] as any),
+          [campo]: novoValor
+        }
+      };
+    });
   };
 
   const podeAvancar = () => {
@@ -107,9 +121,9 @@ export default function MetodoVendasSDR() {
       case 2:
         return formData.etapa2.perfil_cliente && formData.etapa2.motivacao_cliente && formData.etapa2.processo_decisao;
       case 3:
-        return formData.etapa3.maior_desafio && formData.etapa3.origem_clientes && formData.etapa3.urgencia_necessidade;
+        return formData.etapa3.maior_desafio.length > 0 && formData.etapa3.origem_clientes.length > 0 && formData.etapa3.urgencia_necessidade;
       case 4:
-        return formData.etapa4.objetivo_sdr && formData.etapa4.tom_comunicacao;
+        return formData.etapa4.objetivo_sdr.length > 0 && formData.etapa4.tom_comunicacao;
       default:
         return false;
     }
@@ -128,11 +142,27 @@ export default function MetodoVendasSDR() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-      padding: '2rem 1rem'
-    }}>
+    <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+          }
+          html {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+        `
+      }} />
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        padding: '2rem 1rem',
+        margin: 0,
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
       <div style={{
         maxWidth: '800px',
         margin: '0 auto',
@@ -160,7 +190,7 @@ export default function MetodoVendasSDR() {
             margin: '0 auto',
             lineHeight: '1.6'
           }}>
-            Responda algumas perguntas e receba recomendações personalizadas baseadas em inteligência artificial
+            Responda algumas perguntas estratégicas e receba um relatório personalizado com os melhores métodos para otimizar seu processo de vendas
           </p>
         </div>
 
@@ -319,6 +349,7 @@ export default function MetodoVendasSDR() {
         )}
       </div>
     </div>
+    </>
   );
 }
 
@@ -436,12 +467,37 @@ function Etapa1({ dados, onChange }: { dados: any, onChange: (campo: string, val
       </p>
 
       <div style={{ display: 'grid', gap: '2rem' }}>
-        <RadioGroup
-          label="Qual seu segmento?"
-          opcoes={segmentos}
-          valor={dados.segmento}
-          onChange={(valor) => onChange('segmento', valor)}
-        />
+        <div>
+          <RadioGroup
+            label="Qual seu segmento?"
+            opcoes={segmentos}
+            valor={dados.segmento}
+            onChange={(valor) => onChange('segmento', valor)}
+          />
+          
+          {dados.segmento === 'outro' && (
+            <div style={{ marginTop: '1rem' }}>
+              <label style={{ display: 'block', color: '#ffffff', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Especifique seu segmento:
+              </label>
+              <input
+                type="text"
+                value={dados.segmento_outro || ''}
+                onChange={(e) => onChange('segmento_outro', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '8px',
+                  color: '#ffffff',
+                  fontSize: '1rem'
+                }}
+                placeholder="Digite seu segmento"
+              />
+            </div>
+          )}
+        </div>
 
         <RadioGroup
           label="Porte da empresa?"
@@ -552,18 +608,20 @@ function Etapa3({ dados, onChange }: { dados: any, onChange: (campo: string, val
       </p>
 
       <div style={{ display: 'grid', gap: '2rem' }}>
-        <RadioGroup
-          label="Maior desafio atual:"
+        <CheckboxGroup
+          label="Maiores desafios atuais:"
           opcoes={desafios}
-          valor={dados.maior_desafio}
-          onChange={(valor) => onChange('maior_desafio', valor)}
+          valores={dados.maior_desafio || []}
+          onChange={(valores) => onChange('maior_desafio', JSON.stringify(valores))}
+          maxSelecoes={3}
         />
 
-        <RadioGroup
+        <CheckboxGroup
           label="Como clientes chegam até você?"
           opcoes={origens}
-          valor={dados.origem_clientes}
-          onChange={(valor) => onChange('origem_clientes', valor)}
+          valores={dados.origem_clientes || []}
+          onChange={(valores) => onChange('origem_clientes', JSON.stringify(valores))}
+          maxSelecoes={3}
         />
 
         <RadioGroup
@@ -603,11 +661,12 @@ function Etapa4({ dados, onChange }: { dados: any, onChange: (campo: string, val
       </p>
 
       <div style={{ display: 'grid', gap: '2rem' }}>
-        <RadioGroup
-          label="Principal objetivo do SDR:"
+        <CheckboxGroup
+          label="Principais objetivos do SDR:"
           opcoes={objetivos}
-          valor={dados.objetivo_sdr}
-          onChange={(valor) => onChange('objetivo_sdr', valor)}
+          valores={dados.objetivo_sdr || []}
+          onChange={(valores) => onChange('objetivo_sdr', JSON.stringify(valores))}
+          maxSelecoes={2}
         />
 
         <RadioGroup
@@ -661,6 +720,81 @@ function RadioGroup({ label, opcoes, valor, onChange }: {
               value={opcao.value}
               checked={valor === opcao.value}
               onChange={(e) => onChange(e.target.value)}
+              style={{
+                marginRight: '0.75rem',
+                accentColor: '#10b981'
+              }}
+            />
+            <span style={{ fontSize: '1rem' }}>{opcao.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Componente CheckboxGroup para múltipla seleção
+function CheckboxGroup({ label, opcoes, valores, onChange, maxSelecoes = 3 }: {
+  label: string;
+  opcoes: { value: string; label: string }[];
+  valores: string[];
+  onChange: (valores: string[]) => void;
+  maxSelecoes?: number;
+}) {
+  const toggleValor = (valor: string) => {
+    const novosValores = valores.includes(valor)
+      ? valores.filter(v => v !== valor)
+      : valores.length < maxSelecoes 
+        ? [...valores, valor]
+        : valores;
+    onChange(novosValores);
+  };
+
+  return (
+    <div>
+      <label style={{
+        display: 'block',
+        color: '#ffffff',
+        marginBottom: '0.5rem',
+        fontWeight: '500',
+        fontSize: '1.1rem'
+      }}>
+        {label}
+      </label>
+      <p style={{
+        color: '#cbd5e1',
+        fontSize: '0.9rem',
+        marginBottom: '1rem'
+      }}>
+        Selecione até {maxSelecoes} opções
+      </p>
+      <div style={{ display: 'grid', gap: '0.75rem' }}>
+        {opcoes.map((opcao) => (
+          <label
+            key={opcao.value}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '1rem',
+              background: valores.includes(opcao.value) ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+              border: `1px solid ${valores.includes(opcao.value) ? '#10b981' : 'rgba(255, 255, 255, 0.1)'}`,
+              borderRadius: '8px',
+              cursor: valores.length >= maxSelecoes && !valores.includes(opcao.value) ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              color: '#ffffff',
+              opacity: valores.length >= maxSelecoes && !valores.includes(opcao.value) ? 0.5 : 1
+            }}
+            onClick={() => {
+              if (valores.length < maxSelecoes || valores.includes(opcao.value)) {
+                toggleValor(opcao.value);
+              }
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={valores.includes(opcao.value)}
+              onChange={() => toggleValor(opcao.value)}
+              disabled={valores.length >= maxSelecoes && !valores.includes(opcao.value)}
               style={{
                 marginRight: '0.75rem',
                 accentColor: '#10b981'

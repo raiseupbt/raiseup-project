@@ -80,11 +80,27 @@ export default function ResultadoSDR() {
   }).format(new Date(criadoEm));
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-      padding: '2rem 1rem'
-    }}>
+    <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+          }
+          html {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+        `
+      }} />
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        padding: '2rem 1rem',
+        margin: 0,
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
       <div style={{
         maxWidth: '900px',
         margin: '0 auto'
@@ -369,6 +385,7 @@ export default function ResultadoSDR() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
