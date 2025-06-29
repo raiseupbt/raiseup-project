@@ -263,6 +263,20 @@ export default function BlogPost() {
             line-height: 1.6;
           }
 
+          .article-content a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+          }
+
+          .article-content a:hover {
+            color: #34d399;
+            border-bottom-color: #34d399;
+            transform: translateY(-1px);
+          }
+
           .article-cta {
             background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 50%, #7c3aed 100%);
             border-radius: 20px;
