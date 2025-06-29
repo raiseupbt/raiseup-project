@@ -9,9 +9,16 @@ export const action: ActionFunction = async ({ request }) => {
 
   try {
     const dados = await request.json();
+    console.log('📝 Dados recebidos:', JSON.stringify(dados, null, 2));
     
     // Extrair dados do formulário
     const { dados_pessoais, etapa1, etapa2, etapa3, etapa4 } = dados;
+    
+    // Verificar se todos os dados obrigatórios estão presentes
+    if (!dados_pessoais?.nome || !dados_pessoais?.email) {
+      console.error('❌ Dados pessoais incompletos:', dados_pessoais);
+      return json({ error: 'Dados pessoais incompletos' }, { status: 400 });
+    }
     
     // Criar objeto com todas as respostas
     const respostas = {
@@ -20,33 +27,51 @@ export const action: ActionFunction = async ({ request }) => {
       etapa3,
       etapa4
     };
+    
+    console.log('📊 Respostas processadas:', JSON.stringify(respostas, null, 2));
 
     // Gerar resposta personalizada com OpenAI
+    console.log('🤖 Gerando resposta IA...');
     const respostaIA = await gerarRecomendacaoIA(respostas);
+    console.log('✅ Resposta IA gerada, tamanho:', respostaIA.length);
+
+    // Preparar dados para inserção
+    const dadosParaInserir = {
+      nome: dados_pessoais.nome,
+      email: dados_pessoais.email,
+      empresa: dados_pessoais.empresa || null,
+      segmento: etapa1.segmento,
+      porte_empresa: etapa1.porte_empresa,
+      respostas: respostas,
+      resposta_ia: respostaIA,
+      endereco_ip: request.headers.get('x-forwarded-for') || 
+                   request.headers.get('x-real-ip') || 
+                   'unknown',
+      navegador: request.headers.get('user-agent') || 'unknown'
+    };
+    
+    console.log('💾 Dados para inserir no Supabase:', JSON.stringify(dadosParaInserir, null, 2));
 
     // Salvar no Supabase
+    console.log('🗄️ Salvando no Supabase...');
     const { data, error } = await supabase
       .from('formularios_sdr')
-      .insert({
-        nome: dados_pessoais.nome,
-        email: dados_pessoais.email,
-        empresa: dados_pessoais.empresa || null,
-        segmento: etapa1.segmento,
-        porte_empresa: etapa1.porte_empresa,
-        respostas: respostas,
-        resposta_ia: respostaIA,
-        endereco_ip: request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown',
-        navegador: request.headers.get('user-agent') || 'unknown'
-      })
+      .insert(dadosParaInserir)
       .select()
       .single();
 
     if (error) {
-      console.error('Erro ao salvar no Supabase:', error);
-      return json({ error: 'Erro ao salvar dados' }, { status: 500 });
+      console.error('❌ Erro ao salvar no Supabase:', error);
+      console.error('❌ Detalhes do erro:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      return json({ error: `Erro ao salvar dados: ${error.message}` }, { status: 500 });
     }
+    
+    console.log('✅ Dados salvos com sucesso:', data?.id);
 
     return json({ 
       success: true, 
@@ -69,7 +94,12 @@ async function gerarRecomendacaoIA(respostas: any): Promise<string> {
     
     if (!openaiKey) {
       console.warn('OPENAI_API_KEY não configurada, usando resposta simulada');
-      return gerarRespostaSimulada(respostas);
+      try {
+        return gerarRespostaSimulada(respostas);
+      } catch (error) {
+        console.error('❌ Erro na resposta simulada:', error);
+        throw error;
+      }
     }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -154,18 +184,36 @@ Seja específico, prático e use exemplos reais de mensagens.`;
 function gerarRespostaSimulada(respostas: any): string {
   const { etapa1, etapa2, etapa3, etapa4 } = respostas;
   
+  // Função para formatar arrays em strings legíveis
+  const formatarArray = (arr: any) => {
+    if (!arr) return 'não especificado';
+    if (typeof arr === 'string') return arr.replace('-', ' ');
+    if (Array.isArray(arr)) return arr.map(item => item.replace('-', ' ')).join(', ');
+    return String(arr).replace('-', ' ');
+  };
+  
+  // Função para obter primeiro item de array ou string
+  const obterPrimeiro = (value: any) => {
+    if (!value) return 'não especificado';
+    if (Array.isArray(value)) return value[0] || 'não especificado';
+    return value;
+  };
+  
   // Lógica básica para gerar recomendações baseadas nas respostas
   let metodoRecomendado = '';
   let justificativa = '';
   
+  const primeiroObjetivo = obterPrimeiro(etapa4.objetivo_sdr);
+  const primeiroDesafio = obterPrimeiro(etapa3.maior_desafio);
+  
   // Determinar método principal baseado no perfil
-  if (etapa2.perfil_cliente === 'sabem-o-que-querem' && etapa4.objetivo_sdr === 'agendar-consultas') {
+  if (etapa2.perfil_cliente === 'sabem-o-que-querem' && primeiroObjetivo === 'agendar-consultas') {
     metodoRecomendado = 'Método Direto de Agendamento';
     justificativa = 'Seus clientes já sabem o que querem, então o foco deve ser agilizar o agendamento.';
-  } else if (etapa2.perfil_cliente === 'precisam-educacao' && etapa3.maior_desafio === 'educar-produto') {
+  } else if (etapa2.perfil_cliente === 'precisam-educacao' && primeiroDesafio === 'educar-produto') {
     metodoRecomendado = 'Método Educativo Progressivo';
     justificativa = 'Clientes precisam ser educados, então o SDR deve nutrir com conteúdo educativo.';
-  } else if (etapa3.maior_desafio === 'qualificar-leads') {
+  } else if (primeiroDesafio === 'qualificar-leads') {
     metodoRecomendado = 'Método de Qualificação BANT';
     justificativa = 'Foco na qualificação é essencial para otimizar o tempo de vendas.';
   } else {
@@ -182,9 +230,9 @@ function gerarRespostaSimulada(respostas: any): string {
 ${justificativa}
 
 **Por que esta abordagem funciona para seu perfil:**
-- Segmento ${etapa1.segmento} normalmente responde bem a ${etapa4.tom_comunicacao.replace('-', ' ')}
-- Clientes que ${etapa2.perfil_cliente.replace('-', ' ')} precisam de abordagem específica
-- Considerando que o maior desafio é ${etapa3.maior_desafio.replace('-', ' ')}
+- Segmento ${formatarArray(etapa1.segmento)} normalmente responde bem a ${formatarArray(etapa4.tom_comunicacao)}
+- Clientes que ${formatarArray(etapa2.perfil_cliente)} precisam de abordagem específica
+- Considerando que os principais desafios são: ${formatarArray(etapa3.maior_desafio)}
 
 ## 2. MÉTODOS COMPLEMENTARES
 
@@ -211,10 +259,10 @@ ${justificativa}
 
 ## 4. SCRIPTS ESPECÍFICOS PARA WHATSAPP
 
-### Para Clientes que ${etapa2.perfil_cliente.replace('-', ' ')}:
-"Entendo que você ${etapa2.motivacao_cliente.replace('-', ' ')}. Temos uma solução específica para isso. Posso te mostrar como funciona?"
+### Para Clientes que ${formatarArray(etapa2.perfil_cliente)}:
+"Entendo que você ${formatarArray(etapa2.motivacao_cliente)}. Temos uma solução específica para isso. Posso te mostrar como funciona?"
 
-### Para Tratar Objeções de ${etapa3.maior_desafio.replace('-', ' ')}:
+### Para Tratar Objeções de ${formatarArray(etapa3.maior_desafio)}:
 "Entendo sua preocupação. Na verdade, isso é exatamente o que nossos clientes mais relatam. Deixe-me te mostrar como [empresa similar] resolveu isso..."
 
 ## 5. TRATAMENTO DE OBJEÇÕES PRINCIPAIS
@@ -250,7 +298,7 @@ ${justificativa}
 
 ---
 
-**💡 DICA EXTRA:** Considerando que seus clientes vêm principalmente de ${etapa3.origem_clientes.replace('-', ' ')}, certifique-se de mencionar isso na abordagem para criar conexão imediata.
+**💡 DICA EXTRA:** Considerando que seus clientes vêm principalmente de ${formatarArray(etapa3.origem_clientes)}, certifique-se de mencionar isso na abordagem para criar conexão imediata.
 
 **🚀 Quer implementar essas estratégias com automação completa? Agende uma consulta gratuita com nossa equipe!**`;
 }

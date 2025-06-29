@@ -770,7 +770,7 @@ function CheckboxGroup({ label, opcoes, valores, onChange, maxSelecoes = 3 }: {
       </p>
       <div style={{ display: 'grid', gap: '0.75rem' }}>
         {opcoes.map((opcao) => (
-          <label
+          <div
             key={opcao.value}
             style={{
               display: 'flex',
@@ -793,15 +793,19 @@ function CheckboxGroup({ label, opcoes, valores, onChange, maxSelecoes = 3 }: {
             <input
               type="checkbox"
               checked={valores.includes(opcao.value)}
-              onChange={() => toggleValor(opcao.value)}
+              onChange={(e) => {
+                e.stopPropagation();
+                toggleValor(opcao.value);
+              }}
               disabled={valores.length >= maxSelecoes && !valores.includes(opcao.value)}
               style={{
                 marginRight: '0.75rem',
-                accentColor: '#10b981'
+                accentColor: '#10b981',
+                pointerEvents: 'none'
               }}
             />
-            <span style={{ fontSize: '1rem' }}>{opcao.label}</span>
-          </label>
+            <span style={{ fontSize: '1rem', userSelect: 'none' }}>{opcao.label}</span>
+          </div>
         ))}
       </div>
     </div>
